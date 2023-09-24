@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { UseJoined } from "./useJoined";
-
+import { createIRCMessage } from "../utils/createIrcMessage";
+import { useTwitch } from "../context/twitchCtx";
 export const useActiveChannel = (joined: UseJoined) => {
+  const { loginName } = useTwitch();
   const [channelName, setChannelName] = useState<null | string>(null);
 
   const activeChannel = useMemo(() => {
@@ -41,8 +43,25 @@ export const useActiveChannel = (joined: UseJoined) => {
     }
   }, [activeChannel, joined.streams, setChannelName]);
 
+  const send = useCallback(
+    (message: string) => {
+      if (!activeChannel) {
+        return;
+      }
+      const ircMsg = createIRCMessage({
+        username: loginName,
+        message,
+        channelName: activeChannel.channel.channelName,
+      });
+      activeChannel.channel.send(message);
+      joined.addMessage(activeChannel.channel.channelName, ircMsg);
+    },
+    [activeChannel, loginName]
+  );
+
   return {
     activeChannel,
     setChannelName,
+    send,
   };
 };

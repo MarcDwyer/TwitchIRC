@@ -11,6 +11,7 @@ export type TwitchState = {
   followers: UseFollowers;
   token: string;
   joined: UseJoined;
+  loginName: string;
 };
 //@ts-ignore
 const TwitchCtx = createContext<TwitchState>();
@@ -48,7 +49,7 @@ export const TwitchProvider = ({
   const followers = useFollowers({ joined, helixAPI, twitchChat });
 
   return (
-    <TwitchCtx.Provider value={{ token, followers, joined }}>
+    <TwitchCtx.Provider value={{ token, followers, joined, loginName }}>
       {children}
     </TwitchCtx.Provider>
   );

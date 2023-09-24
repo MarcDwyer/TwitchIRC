@@ -1,17 +1,17 @@
-import { IrcMessage } from "@src/twitchChat/twitch_data";
 import { useState } from "react";
+import { JoinedValue } from "../../reducers/JoinedReducer";
 
 type Props = {
-  messages: IrcMessage[];
-  sendMessage: (msg: string) => void;
+  activeChannel: JoinedValue;
+  send: (message: string) => void;
 };
-export const ChatBox = ({ messages, sendMessage }: Props) => {
+export const ChatBox = ({ activeChannel, send }: Props) => {
   const [newMessage, setNewMessage] = useState("");
 
   return (
     <div className="w-full h-full p-4 shadow-md flex flex-col">
       <div className="h-full overflow-y-auto">
-        {messages.map((message, index) => {
+        {activeChannel.messages.map((message, index) => {
           const color = message.tags.color;
           return (
             <div key={index} className="mb-2">
@@ -31,8 +31,8 @@ export const ChatBox = ({ messages, sendMessage }: Props) => {
         className="flex h-42"
         onSubmit={(e) => {
           e.preventDefault();
-          sendMessage(newMessage);
-          setNewMessage("");
+          // activeChannel.channel.send(newMessage);
+          send(newMessage);
         }}
       >
         <input

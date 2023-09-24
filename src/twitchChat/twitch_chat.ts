@@ -52,7 +52,7 @@ export class TwitchChat {
         ws.send(`NICK ${this.username}`);
       };
       ws.onmessage = (msg) => {
-        console.log(parseMessage(msg.data));
+        // console.log(parseMessage(msg.data));
         const tmsg = msgParcer(msg.data, this.username);
         if (tmsg) {
           const lCmd = tmsg.command.toLowerCase();

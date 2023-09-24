@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useCallback, useReducer } from "react";
 import { TwitchStream } from "@src/helix/types/liveFollowers";
 import { TwitchChat } from "@src/twitchChat/twitch_chat";
 import { IrcMessage } from "@src/twitchChat/twitch_data";
@@ -62,12 +62,15 @@ export const useJoined = (chatAPI: TwitchChat | null) => {
     return streams.has(channelName);
   };
 
-  const addMessage = (channelName: string, message: IrcMessage) => {
-    dispatch({
-      type: ADD_MESSAGE,
-      payload: { channelName, message },
-    });
-  };
+  const addMessage = useCallback(
+    (channelName: string, message: IrcMessage) => {
+      dispatch({
+        type: ADD_MESSAGE,
+        payload: { channelName, message },
+      });
+    },
+    [dispatch]
+  );
   return {
     checkIfJoined,
     partChannel,

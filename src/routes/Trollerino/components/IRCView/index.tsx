@@ -6,7 +6,7 @@ import { useActiveChannel } from "../../hooks/useActiveChannel";
 export const IRCView = () => {
   const { joined } = useTwitch();
 
-  const { activeChannel, setChannelName } = useActiveChannel(joined);
+  const { activeChannel, setChannelName, send } = useActiveChannel(joined);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -14,14 +14,7 @@ export const IRCView = () => {
         activeChannelName={activeChannel?.channel.channelName}
         setActiveChannel={setChannelName}
       />
-      {activeChannel && (
-        <ChatBox
-          messages={activeChannel.messages}
-          sendMessage={(msg: string) => {
-            activeChannel.channel.send(msg);
-          }}
-        />
-      )}
+      {activeChannel && <ChatBox activeChannel={activeChannel} send={send} />}
     </div>
   );
 };

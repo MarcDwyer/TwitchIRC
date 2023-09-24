@@ -29,6 +29,7 @@ export function JoinedReducer(
       return new Map(state);
     case ADD_MESSAGE:
       const joinedChan = state.get(payload.channelName);
+      console.log("called", payload.message);
       if (joinedChan) {
         joinedChan.messages.push(payload.message);
         return new Map(state);
