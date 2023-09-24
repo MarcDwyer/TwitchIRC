@@ -20,23 +20,29 @@ export const ChannelsRow = ({ activeChannelName, setActiveChannel }: Props) => {
           return (
             <div
               key={index}
-              className={`cursor-pointer p-4 ${
+              className={`cursor-pointer ${
                 activeChannelName &&
                 stream.channel.channelName === activeChannelName
                   ? "bg-gray-500 text-white"
                   : ""
-              } relative`}
+              }`}
             >
-              <FontAwesomeIcon
-                className="absolute top-0 right-0 -m-2 p-2 text-white"
-                icon={faX}
-                onClick={() => joined.partChannel(channelName)}
-              />
-              <span
-                onClick={() => setActiveChannel(stream.streamInfo.user_login)}
-              >
-                {channelName}
-              </span>
+              <div className="flex flex-col">
+                <div
+                  onClick={() => {
+                    console.log("clicked");
+                    joined.partChannel(channelName);
+                  }}
+                  className="ml-auto"
+                >
+                  <FontAwesomeIcon className="text-white" icon={faX} />
+                </div>
+                <span
+                  onClick={() => setActiveChannel(stream.streamInfo.user_login)}
+                >
+                  {channelName}
+                </span>
+              </div>
             </div>
           );
         })}

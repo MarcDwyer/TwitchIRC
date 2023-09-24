@@ -31,14 +31,13 @@ export const ChatBox = ({ activeChannel, send }: Props) => {
         className="flex h-42"
         onSubmit={(e) => {
           e.preventDefault();
-          // activeChannel.channel.send(newMessage);
           send(newMessage);
         }}
       >
         <input
           type="text"
           placeholder="Type your message..."
-          className="flex-1 p-2 rounded-l-md text-black"
+          className="flex-1 p-5 rounded-l-md text-white"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
         />
