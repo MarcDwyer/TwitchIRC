@@ -1,19 +1,17 @@
-import { Channel } from "@/twitchChat/channel";
-import { JoinedTwitchStream } from "../hooks/useJoined";
+import { Channel } from "@src/twitchChat/channel";
+import { IrcMessage } from "@src/twitchChat/twitch_data";
 import { Action } from ".";
-import { IrcMessage } from "@/twitchChat/twitch_data";
+import { TwitchStream } from "@src/helix/types/liveFollowers";
 
-type JoinedReducerState = {
-  streams: Map<string, JoinedTwitchStream>;
-  channels: Map<string, Channel>;
-  messages: Map<string, IrcMessage[]>;
+export type JoinedValue = {
+  streamInfo: TwitchStream;
+  channel: Channel;
+  messages: IrcMessage[];
 };
 
-export const InitialJoinState: JoinedReducerState = {
-  streams: new Map(),
-  channels: new Map(),
-  messages: new Map(),
-};
+type JoinedReducerState = Map<string, JoinedValue>;
+
+export const InitialJoinState: JoinedReducerState = new Map();
 
 export const ADD_CHANNEL_AND_STREAM = Symbol();
 export const DELETE_CHANNEL_AND_STREAM = Symbol();
@@ -25,36 +23,17 @@ export function JoinedReducer(
 ): JoinedReducerState {
   switch (type) {
     case ADD_CHANNEL_AND_STREAM:
-      return {
-        ...state,
-        streams: new Map(state.streams).set(
-          payload.channelName,
-          payload.stream
-        ),
-        channels: new Map(state.channels).set(
-          payload.channelName,
-          payload.channel
-        ),
-      };
+      return new Map(state).set(payload.channelName, payload.joinedValue);
     case DELETE_CHANNEL_AND_STREAM:
-      state.streams.delete(payload.channelName);
-      state.channels.delete(payload.channelName);
-      state.messages.delete(payload.channelName);
-      return {
-        ...state,
-        streams: new Map(state.streams),
-        channels: new Map(state.channels),
-        messages: new Map(state.messages),
-      };
+      state.delete(payload.channelName);
+      return new Map(state);
     case ADD_MESSAGE:
-      const ircMsgs = state.messages.get(payload.channelName) ?? [];
-      ircMsgs.push(payload.message);
-      return {
-        ...state,
-        messages: new Map(state.messages).set(payload.channelName, [
-          ...ircMsgs,
-        ]),
-      };
+      const joinedChan = state.get(payload.channelName);
+      if (joinedChan) {
+        joinedChan.messages.push(payload.message);
+        return new Map(state);
+      }
+      return state;
     default:
       return state;
   }

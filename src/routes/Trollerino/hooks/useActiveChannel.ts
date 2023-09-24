@@ -8,22 +8,16 @@ export const useActiveChannel = (joined: UseJoined) => {
     if (!channelName) {
       return null;
     }
-    return joined.channels.get(channelName);
-  }, [joined.channels, channelName]);
-
-  const activeMessages = useMemo(() => {
-    if (!channelName) {
-      return [];
-    }
-    return joined.messages.get(channelName) ?? [];
-  }, [joined.messages, channelName]);
+    return joined.streams.get(channelName);
+  }, [joined.streams, channelName]);
 
   useEffect(() => {
     if (activeChannel) {
-      activeChannel.addEventListener("privmsg", (msg) => {
-        joined.addMessage(activeChannel.channelName, msg);
+      console.log(`Setting ${activeChannel.channel.channelName} listeners...`);
+      activeChannel.channel.addEventListener("privmsg", (msg) => {
+        joined.addMessage(activeChannel.channel.channelName, msg);
       });
-      activeChannel.addEventListener("userstate", (msg) => {
+      activeChannel.channel.addEventListener("userstate", (msg) => {
         // joined.addMessage(activeChannel.channelName, msg);
         console.log(msg.message);
       });
@@ -31,15 +25,18 @@ export const useActiveChannel = (joined: UseJoined) => {
 
     return () => {
       if (activeChannel) {
-        activeChannel.removeEventListener("privmsg");
-        activeChannel.removeEventListener("userstate");
+        console.log(
+          `Removing ${activeChannel.channel.channelName} listeners...`
+        );
+        activeChannel.channel.removeEventListener("privmsg");
+        activeChannel.channel.removeEventListener("userstate");
       }
     };
   }, [activeChannel]);
 
   useEffect(() => {
     if (!activeChannel && joined.streams.size) {
-      const { channelName } = Array.from(joined.streams.values())[0];
+      const { channelName } = Array.from(joined.streams.values())[0].channel;
       setChannelName(channelName);
     }
   }, [activeChannel, joined.streams, setChannelName]);
@@ -47,6 +44,5 @@ export const useActiveChannel = (joined: UseJoined) => {
   return {
     activeChannel,
     setChannelName,
-    activeMessages,
   };
 };

@@ -1,4 +1,4 @@
-import { IrcMessage } from "@/twitchChat/twitch_data";
+import { IrcMessage } from "@src/twitchChat/twitch_data";
 import { useState } from "react";
 
 type Props = {

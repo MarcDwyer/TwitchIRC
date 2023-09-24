@@ -9,43 +9,37 @@ import {
   DELETE_CHANNEL_AND_STREAM,
   InitialJoinState,
   JoinedReducer,
+  JoinedValue,
 } from "../reducers/JoinedReducer";
-
-export type JoinedTwitchStream = TwitchStream & {
-  messages: IrcMessage[];
-  channelName: string;
-};
 
 export type UseJoined = ReturnType<typeof useJoined>;
 
 export const useJoined = (chatAPI: TwitchChat | null) => {
-  const [{ channels, streams, messages }, dispatch] = useReducer(
-    JoinedReducer,
-    InitialJoinState
-  );
+  const [streams, dispatch] = useReducer(JoinedReducer, InitialJoinState);
 
   // streams is an array due to the broadcast all feature
-  const joinChannels = (streams: TwitchStream[]) => {
+  const joinChannels = (twitchStreams: TwitchStream[]) => {
     if (!chatAPI) {
       throw new Error("Twitch Chat has not been set");
     }
-    for (const stream of streams) {
+    for (const stream of twitchStreams) {
       const channelName = getChannelName(stream.user_login);
 
-      if (channels.has(channelName)) {
+      if (streams.has(channelName)) {
         continue;
       }
       const [channel] = chatAPI.joinChannel(stream.user_login);
 
+      const joinedValue: JoinedValue = {
+        channel,
+        streamInfo: stream,
+        messages: [],
+      };
       dispatch({
         type: ADD_CHANNEL_AND_STREAM,
         payload: {
           channelName: channel.channelName,
-          channel,
-          stream: Object.assign(stream, {
-            messages: [],
-            channelName: channel.channelName,
-          }),
+          joinedValue,
         },
       });
     }
@@ -55,9 +49,9 @@ export const useJoined = (chatAPI: TwitchChat | null) => {
     if (!chatAPI) {
       throw new Error("Twitch Chat has not been set");
     }
-    const channel = channels.get(channelName);
-    if (channel) {
-      channel.part();
+    const joinedStream = streams.get(channelName);
+    if (joinedStream) {
+      joinedStream.channel.part();
     }
     dispatch({ type: DELETE_CHANNEL_AND_STREAM, payload: { channelName } });
   };
@@ -65,7 +59,7 @@ export const useJoined = (chatAPI: TwitchChat | null) => {
   const checkIfJoined = (channelName: string) => {
     channelName = getChannelName(channelName);
 
-    return channels.has(channelName);
+    return streams.has(channelName);
   };
 
   const addMessage = (channelName: string, message: IrcMessage) => {
@@ -78,9 +72,7 @@ export const useJoined = (chatAPI: TwitchChat | null) => {
     checkIfJoined,
     partChannel,
     joinChannels,
-    channels,
-    streams,
     addMessage,
-    messages,
+    streams,
   };
 };
