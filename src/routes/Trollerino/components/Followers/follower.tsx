@@ -1,4 +1,4 @@
-import { TwitchStream } from "@/helix/types/liveFollowers";
+import { TwitchStream } from "@src/helix/types/liveFollowers";
 import { useTwitch } from "../../context/twitchCtx";
 
 type Props = {

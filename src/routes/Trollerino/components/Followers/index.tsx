@@ -1,6 +1,6 @@
 import { useTwitch } from "../../context/twitchCtx";
-import { BroadcastAll } from "./broadcastAll";
-import { Follower } from "./follower";
+import { BroadcastAll } from "./BroadcastAll";
+import { Follower } from "./Follower";
 
 export const Followers = () => {
   const { followers } = useTwitch();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getParamsFromHash } from "../../utils/oauth";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export type AuthParameters = {
   access_token?: string;
@@ -11,9 +11,6 @@ export default function Auth() {
   const [token, setToken] = useState<string | null>(null);
   const [loginName, setLoginName] = useState<string>("");
   const navigate = useNavigate();
-  const params = useParams();
-
-  console.log({ params });
 
   useEffect(() => {
     const { access_token } = getParamsFromHash<AuthParameters>(

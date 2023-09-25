@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Homepage from "./routes/Home";
 import Auth from "./routes/Auth";
 import Trollerino from "./routes/Trollerino";
+import { ToastContainer } from "react-toastify";
 import "./App.css";
 
 const router = createBrowserRouter([
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
 function App() {
   return (
     <div className="w-full h-screen flex overflow-hidden">
+      <ToastContainer />
       <RouterProvider router={router} />
     </div>
   );

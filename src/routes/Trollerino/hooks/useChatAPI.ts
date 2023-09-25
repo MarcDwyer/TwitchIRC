@@ -1,5 +1,5 @@
 import { TwitchChat } from "@src/twitchChat/twitch_chat";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 export type UseChatAPIParams = {
   token: string;
@@ -7,12 +7,12 @@ export type UseChatAPIParams = {
 };
 
 export const useChatAPI = ({ token, loginName }: UseChatAPIParams) => {
-  const [chatAPI, setChatAPI] = useState<null | TwitchChat>(null);
+  const chatAPI = useMemo(
+    () => new TwitchChat(token, loginName),
+    [token, loginName]
+  );
 
   useEffect(() => {
-    if (!chatAPI) {
-      setChatAPI(new TwitchChat(token, loginName));
-    }
     return function () {
       if (chatAPI && chatAPI.ws) {
         chatAPI.disconnect();

@@ -1,7 +1,8 @@
 import { Channel } from "@src/twitchChat/channel";
 import { TwitchChat } from "@src/twitchChat/twitch_chat";
 import { getChannelName } from "@src/twitchChat/util";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { toast } from "react-toastify";
 
 export type ChannelMap = Map<string, Channel>;
 export type UseTwitchChat = ReturnType<typeof useTwitchChat>;
@@ -11,32 +12,22 @@ export type UseTwitchChatParams = {
   loginName: string;
   chatAPI: TwitchChat;
 };
-export const useTwitchChat = (chatAPI: TwitchChat | null) => {
-  const [connected, setConnected] = useState(false);
-  const [connecting, setConnecting] = useState(false);
 
-  useEffect(() => {
-    if (!connected && chatAPI && !connecting) {
-      console.log("called connect...");
-      connect();
-    }
-  }, [connected, chatAPI, connecting]);
+export const useTwitchChat = (chatAPI: TwitchChat) => {
+  const [connected, setConnected] = useState(false);
 
   const connect = useCallback(async () => {
     try {
       if (!chatAPI) {
         throw new Error("Twitch Chat has not been set");
       }
-      setConnecting(true);
       await chatAPI.connect();
       setConnected(true);
-      console.log("connected.");
     } catch (e) {
       console.error(e);
-    } finally {
-      setConnecting(false);
+      toast("Error connecting to twitch chat");
     }
-  }, [chatAPI]);
+  }, [chatAPI, setConnected, setConnected]);
 
   const disconnect = useCallback(() => {
     try {

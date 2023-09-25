@@ -1,6 +1,6 @@
 import { UserData, UserDataResponse } from "./user_info.ts";
 import { TwitchLiveFollowersResponse } from "./types/liveFollowers.js";
-import { NavigateFunction } from "react-router-dom";
+import { checkIfError } from "@src/routes/Trollerino/utils/checkIfError.ts";
 
 enum HelixURLS {
   liveFollowers = "https://api.twitch.tv/helix/streams/followed",
@@ -16,35 +16,30 @@ export class HelixAPI {
   oauth: string | undefined;
   userData: UserData | undefined;
 
-  constructor(
-    private credentials: HelixAPIParams,
-    private navigate: NavigateFunction
-  ) {}
+  constructor(private credentials: HelixAPIParams) {}
 
-  async getLiveFollowers() {
+  async getLiveFollowers(): Promise<[TwitchLiveFollowersResponse, UserData]> {
     const url = new URL(HelixURLS.liveFollowers);
     const userData = await this.getUserData();
 
     url.searchParams.set("user_id", userData.id);
 
-    return this.fetchHelix<TwitchLiveFollowersResponse>(url.toString());
+    const followers = await this.fetchHelix<TwitchLiveFollowersResponse>(
+      url.toString()
+    );
+    return [followers, userData];
   }
-  async fetchHelix<T>(url: string): Promise<T> {
+  async fetchHelix<T>(url: string): Promise<T & { error?: string }> {
     const { token, clientId } = this.credentials;
-    try {
-      const helixResponse = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Client-Id": clientId,
-        },
-      });
+    const helixResponse = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Client-Id": clientId,
+      },
+    });
 
-      return helixResponse.json();
-    } catch (e) {
-      this.navigate("/");
-      throw e;
-    }
+    return helixResponse.json();
   }
   async getUserData() {
     if (this.userData) {
@@ -52,7 +47,9 @@ export class HelixAPI {
     }
     const url = new URL(HelixURLS.userData);
     url.searchParams.set("login", this.credentials.loginName);
+    console.log("called here");
     const response = await this.fetchHelix<UserDataResponse>(url.toString());
+    checkIfError(response);
     this.userData = response.data[0];
     return this.userData;
   }

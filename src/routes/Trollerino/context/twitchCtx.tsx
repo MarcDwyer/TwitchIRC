@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 import { UseFollowers, useFollowers } from "../hooks/useFollowers";
 import { useTwitchChat } from "../hooks/useTwitchChat";
 import { UseJoined, useJoined } from "../hooks/useJoined";
@@ -29,11 +29,7 @@ export const TwitchProvider = ({
   const navigate = useNavigate();
 
   const helixAPI = useMemo(
-    () =>
-      new HelixAPI(
-        { token: token ?? "", loginName, clientId: CLIENTID },
-        navigate
-      ),
+    () => new HelixAPI({ token: token ?? "", loginName, clientId: CLIENTID }),
     [token, loginName, navigate]
   );
 
@@ -47,6 +43,12 @@ export const TwitchProvider = ({
   const joined = useJoined(chatAPI);
 
   const followers = useFollowers({ joined, helixAPI, twitchChat });
+
+  useEffect(() => {
+    if (followers.streams && !twitchChat.connected) {
+      twitchChat.connect();
+    }
+  }, [followers, twitchChat]);
 
   return (
     <TwitchCtx.Provider value={{ token, followers, joined, loginName }}>

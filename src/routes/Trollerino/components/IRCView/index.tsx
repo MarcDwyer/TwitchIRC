@@ -4,17 +4,23 @@ import { ChatBox } from "./Chatbox";
 import { useActiveChannel } from "../../hooks/useActiveChannel";
 
 export const IRCView = () => {
-  const { joined } = useTwitch();
+  const { joined, followers } = useTwitch();
 
   const { activeChannel, setChannelName, send } = useActiveChannel(joined);
 
   return (
     <div className="w-full h-full flex flex-col">
-      <ChannelsRow
-        activeChannelName={activeChannel?.channel.channelName}
-        setActiveChannel={setChannelName}
-      />
-      {activeChannel && <ChatBox activeChannel={activeChannel} send={send} />}
+      {followers.streams && followers.streams.length && (
+        <>
+          <ChannelsRow
+            activeChannelName={activeChannel?.channel.channelName}
+            setActiveChannel={setChannelName}
+          />
+          {activeChannel && (
+            <ChatBox activeChannel={activeChannel} send={send} />
+          )}
+        </>
+      )}
     </div>
   );
 };

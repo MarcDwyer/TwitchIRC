@@ -1,8 +1,10 @@
 import { HelixAPI } from "@src/helix";
 import { TwitchStream } from "@src/helix/types/liveFollowers";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UseTwitchChat } from "./useTwitchChat";
 import { UseJoined } from "./useJoined";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 type UseFollowersParams = {
   helixAPI: HelixAPI;
@@ -17,14 +19,27 @@ export const useFollowers = ({
   joined,
 }: UseFollowersParams) => {
   const [streams, setStreams] = useState<null | TwitchStream[]>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
-  async function getFollowers() {
-    const { data } = await helixAPI.getLiveFollowers();
-    setStreams(data);
-  }
-  useEffect(() => {
-    if (!streams) getFollowers();
-  }, [helixAPI]);
+  // once followers are fetched we connect to twitchchat
+  const getFollowers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [followers] = await helixAPI.getLiveFollowers();
+
+      setStreams(followers.data);
+      setLoading(false);
+    } catch (e: any) {
+      if ("message" in e) {
+        toast(e.message, {
+          onClose: () => navigate("/"),
+        });
+      } else {
+        toast("Something went wrong");
+      }
+    }
+  }, [navigate, setStreams, helixAPI, setLoading]);
 
   const broadcast = (msg: string) => {
     if (streams) {
@@ -35,6 +50,10 @@ export const useFollowers = ({
       throw new Error("Followers don't exist");
     }
   };
+  useEffect(() => {
+    if (!streams && !loading) getFollowers();
+  }, [getFollowers, streams, loading]);
+
   return {
     streams,
     broadcast,
