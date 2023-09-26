@@ -1,6 +1,6 @@
 import { Deferred } from "@src/utils/async/deferred";
 import { Modal, Button } from "flowbite-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Props = {
   signal: Deferred<string>;
@@ -10,23 +10,34 @@ type Props = {
 export const BroadcastModal = ({ signal, open }: Props) => {
   const [message, setMessage] = useState("");
 
-  console.log(signal.state);
   return (
     <Modal
-      className="flex border-2"
+      position="center"
       show={open}
       onClose={() => {
         signal.reject();
       }}
+      className="text-white"
     >
-      <Modal.Body className="m-auto">
+      <Modal.Header as={"span"} className="bg-gray-700">
+        <span className="text-white">What would you like to broadcast?</span>
+      </Modal.Header>
+      <Modal.Body className="bg-gray-700 text-white">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             signal.resolve(message);
+            setMessage("");
           }}
         >
-          <input value={message} onChange={(e) => setMessage(e.target.value)} />
+          <input
+            className="p-2 mb-3 w-full"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <Button className="ml-auto" type="submit">
+            Submit
+          </Button>
         </form>
       </Modal.Body>
     </Modal>

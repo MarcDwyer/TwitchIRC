@@ -3,26 +3,24 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import { useTwitch } from "../../../context/twitchCtx";
 
 type Props = {
-  activeChannelName: string | undefined;
-  setActiveChannel: (channelName: string) => void;
+  activeKeyName: string | null;
+  setActiveKeyName: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
-export const ChannelsRow = ({ activeChannelName, setActiveChannel }: Props) => {
+export const ChannelsRow = ({ activeKeyName, setActiveKeyName }: Props) => {
   const { joined } = useTwitch();
 
   const streams = Array.from(joined.streams.values());
 
   return (
-    <div className="w-full h-12 bg-gray-700 flex">
+    <div className="w-full bg-gray-700 flex">
       <>
         {streams.map((stream, index) => {
-          const channelName = stream.channel.channelName;
           return (
             <div
               key={index}
-              className={`cursor-pointer ${
-                activeChannelName &&
-                stream.channel.channelName === activeChannelName
+              className={`cursor-pointer w-36 ${
+                activeKeyName && stream.keyName === activeKeyName
                   ? "bg-gray-500 text-white"
                   : ""
               }`}
@@ -30,18 +28,22 @@ export const ChannelsRow = ({ activeChannelName, setActiveChannel }: Props) => {
               <div className="flex flex-col">
                 <div
                   onClick={() => {
-                    console.log("clicked");
-                    joined.partChannel(channelName);
+                    console.log("clicked part");
+                    joined.partChannel(stream.keyName);
+                    setActiveKeyName(null);
                   }}
                   className="ml-auto"
                 >
                   <FontAwesomeIcon className="text-white" icon={faX} />
                 </div>
-                <span
-                  onClick={() => setActiveChannel(stream.streamInfo.user_login)}
+                <div
+                  className="w-full flex p-1"
+                  onClick={() => setActiveKeyName(stream.keyName)}
                 >
-                  {channelName}
-                </span>
+                  <span className="truncate m-auto">
+                    {stream.streamInfo.user_name}
+                  </span>
+                </div>
               </div>
             </div>
           );

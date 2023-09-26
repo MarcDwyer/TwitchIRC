@@ -10,13 +10,45 @@ import {
   InitialJoinState,
   JoinedReducer,
   JoinedValue,
+  SET_MENTIONED,
 } from "../reducers/JoinedReducer";
+import { Channel, ChannelEvents } from "@src/twitchChat/channel";
+import { checkIfMentioned } from "../utils/checkIfMentioned";
 
 export type UseJoined = ReturnType<typeof useJoined>;
 
-export const useJoined = (chatAPI: TwitchChat | null) => {
+const usedEvents: ChannelEvents[] = ["privmsg"];
+
+const removeListeners = (channel: Channel, evts: ChannelEvents[]) => {
+  for (const evt of evts) {
+    channel.removeEventListener(evt);
+  }
+};
+
+export const useJoined = (chatAPI: TwitchChat | null, loginName: string) => {
   const [streams, dispatch] = useReducer(JoinedReducer, InitialJoinState);
 
+  const setMentioned = useCallback(
+    (keyName: string, mentioned: boolean) => {
+      dispatch({
+        type: SET_MENTIONED,
+        payload: { keyName, mentioned },
+      });
+    },
+    [dispatch]
+  );
+
+  const addListeners = useCallback(
+    ({ channel, keyName }: JoinedValue) => {
+      channel.addEventListener("privmsg", (msg) => {
+        if (checkIfMentioned(msg.message, loginName)) {
+          setMentioned(keyName, true);
+        }
+        addMessage(keyName, msg);
+      });
+    },
+    [dispatch, setMentioned]
+  );
   // streams is an array due to the broadcast all feature
   const joinChannels = (twitchStreams: TwitchStream[]) => {
     if (!chatAPI) {
@@ -34,11 +66,16 @@ export const useJoined = (chatAPI: TwitchChat | null) => {
         channel,
         streamInfo: stream,
         messages: [],
+        keyName: channelName,
+        mentioned: false,
       };
+
+      addListeners(joinedValue);
+
       dispatch({
         type: ADD_CHANNEL_AND_STREAM,
         payload: {
-          channelName: channel.channelName,
+          channelName,
           joinedValue,
         },
       });
@@ -51,6 +88,7 @@ export const useJoined = (chatAPI: TwitchChat | null) => {
     }
     const joinedStream = streams.get(channelName);
     if (joinedStream) {
+      removeListeners(joinedStream.channel, usedEvents);
       joinedStream.channel.part();
     }
     dispatch({ type: DELETE_CHANNEL_AND_STREAM, payload: { channelName } });
@@ -71,7 +109,9 @@ export const useJoined = (chatAPI: TwitchChat | null) => {
     },
     [dispatch]
   );
+
   return {
+    setMentioned,
     checkIfJoined,
     partChannel,
     joinChannels,

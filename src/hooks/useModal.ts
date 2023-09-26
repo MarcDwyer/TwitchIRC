@@ -1,5 +1,5 @@
 import { deferred } from "@src/utils/async/deferred";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 export const useModal = <T>() => {
   const [signal, setSignal] = useState(deferred<T>());
@@ -7,14 +7,12 @@ export const useModal = <T>() => {
 
   const openModal = useCallback(() => {
     setOpen(true);
+    signal.finally(() => {
+      setOpen(false);
+      setSignal(deferred());
+    });
     return signal;
   }, [signal, setOpen]);
-
-  useEffect(() => {
-    signal.finally(() => {
-      setSignal(deferred<T>());
-    });
-  }, [signal]);
 
   return {
     signal,

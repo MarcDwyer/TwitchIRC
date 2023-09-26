@@ -40,7 +40,7 @@ export const TwitchProvider = ({
 
   const twitchChat = useTwitchChat(chatAPI);
 
-  const joined = useJoined(chatAPI);
+  const joined = useJoined(chatAPI, loginName);
 
   const followers = useFollowers({ joined, helixAPI, twitchChat });
 

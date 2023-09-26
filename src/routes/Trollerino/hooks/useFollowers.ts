@@ -5,6 +5,7 @@ import { UseTwitchChat } from "./useTwitchChat";
 import { UseJoined } from "./useJoined";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { getChannelName } from "@src/twitchChat/util";
 
 type UseFollowersParams = {
   helixAPI: HelixAPI;
@@ -43,9 +44,11 @@ export const useFollowers = ({
 
   const broadcast = (msg: string) => {
     if (streams) {
-      const channelNames = streams.map((stream) => stream.user_login);
-      twitchChat.broadcast(channelNames, msg);
+      const channelNames = streams.map((stream) =>
+        getChannelName(stream.user_login)
+      );
       joined.joinChannels(streams);
+      twitchChat.broadcast(channelNames, msg);
     } else {
       throw new Error("Followers don't exist");
     }

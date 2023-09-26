@@ -7,6 +7,8 @@ export type JoinedValue = {
   streamInfo: TwitchStream;
   channel: Channel;
   messages: IrcMessage[];
+  keyName: string;
+  mentioned: boolean;
 };
 
 type JoinedReducerState = Map<string, JoinedValue>;
@@ -16,6 +18,16 @@ export const InitialJoinState: JoinedReducerState = new Map();
 export const ADD_CHANNEL_AND_STREAM = Symbol();
 export const DELETE_CHANNEL_AND_STREAM = Symbol();
 export const ADD_MESSAGE = Symbol();
+export const SET_MENTIONED = Symbol();
+
+const MSGLIMIT = 150;
+
+function enforceMsgLimit(msgs: IrcMessage[]) {
+  if (msgs.length >= MSGLIMIT) {
+    return msgs.slice(0, MSGLIMIT);
+  }
+  return msgs;
+}
 
 export function JoinedReducer(
   state: JoinedReducerState,
@@ -30,7 +42,16 @@ export function JoinedReducer(
     case ADD_MESSAGE:
       const joinedChan = state.get(payload.channelName);
       if (joinedChan) {
-        joinedChan.messages.push(payload.message);
+        const ircMsgs = enforceMsgLimit(joinedChan.messages);
+        ircMsgs.push(payload.message);
+        joinedChan.messages = ircMsgs;
+        return new Map(state);
+      }
+      return state;
+    case SET_MENTIONED:
+      const mentionedChan = state.get(payload.keyName);
+      if (mentionedChan) {
+        mentionedChan.mentioned = payload.mentioned;
         return new Map(state);
       }
       return state;

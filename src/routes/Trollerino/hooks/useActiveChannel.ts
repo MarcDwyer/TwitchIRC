@@ -2,46 +2,27 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { UseJoined } from "./useJoined";
 import { createIRCMessage } from "../utils/createIrcMessage";
 import { useTwitch } from "../context/twitchCtx";
+
 export const useActiveChannel = (joined: UseJoined) => {
   const { loginName } = useTwitch();
-  const [channelName, setChannelName] = useState<null | string>(null);
+  const [activeKeyName, setActiveKeyName] = useState<null | string>(null);
 
   const activeChannel = useMemo(() => {
-    if (!channelName) {
+    if (!activeKeyName) {
       return null;
     }
-    return joined.streams.get(channelName);
-  }, [joined.streams, channelName]);
-
-  useEffect(() => {
-    if (activeChannel) {
-      console.log(`Setting ${activeChannel.channel.channelName} listeners...`);
-      activeChannel.channel.addEventListener("privmsg", (msg) => {
-        joined.addMessage(activeChannel.channel.channelName, msg);
-      });
-      activeChannel.channel.addEventListener("userstate", (msg) => {
-        // joined.addMessage(activeChannel.channelName, msg);
-        console.log(msg.message);
-      });
-    }
-
-    return () => {
-      if (activeChannel) {
-        console.log(
-          `Removing ${activeChannel.channel.channelName} listeners...`
-        );
-        activeChannel.channel.removeEventListener("privmsg");
-        activeChannel.channel.removeEventListener("userstate");
-      }
-    };
-  }, [activeChannel]);
+    return joined.streams.get(activeKeyName);
+  }, [joined.streams, activeKeyName]);
 
   useEffect(() => {
     if (!activeChannel && joined.streams.size) {
-      const { channelName } = Array.from(joined.streams.values())[0].channel;
-      setChannelName(channelName);
+      const streams = Array.from(joined.streams.values());
+      const keyName = streams[streams.length - 1].keyName;
+      setActiveKeyName(keyName);
     }
-  }, [activeChannel, joined.streams, setChannelName]);
+  }, [activeChannel, joined.streams, setActiveKeyName]);
+
+  useEffect(() => {}, [activeChannel]);
 
   const send = useCallback(
     (message: string) => {
@@ -61,7 +42,8 @@ export const useActiveChannel = (joined: UseJoined) => {
 
   return {
     activeChannel,
-    setChannelName,
+    setActiveKeyName,
+    activeKeyName,
     send,
   };
 };
