@@ -1,34 +1,22 @@
 import { useTwitch } from "../../context/twitchCtx";
 import { ChannelsRow } from "./ChannelsRow";
 import { ChatBox } from "./Chatbox";
-import { useActiveChannel } from "../../hooks/useActiveChannel";
-import { useEffect } from "react";
+import { ActiveStreamProvider } from "./context/ActiveStreamCtx";
 
 export const IRCView = () => {
-  const { joined, followers } = useTwitch();
-
-  const { activeKeyName, setActiveKeyName, send, activeChannel } =
-    useActiveChannel(joined);
-
-  useEffect(() => {
-    if (activeChannel && activeChannel.mentioned) {
-      joined.setMentioned(activeChannel?.keyName, false);
-    }
-  }, [activeChannel]);
-
+  const { followers } = useTwitch();
   return (
-    <div className="w-full h-full flex flex-col">
-      {followers.streams && followers.streams.length && (
-        <>
-          <ChannelsRow
-            activeKeyName={activeKeyName}
-            setActiveKeyName={setActiveKeyName}
-          />
-          {activeChannel && (
-            <ChatBox activeChannel={activeChannel} send={send} />
-          )}
-        </>
-      )}
-    </div>
+    <ActiveStreamProvider>
+      <div className="w-full h-full flex flex-col">
+        {followers.streams && followers.streams.length && (
+          <>
+            <ChannelsRow />
+            {activeChannel && (
+              <ChatBox activeChannel={activeChannel} send={send} />
+            )}
+          </>
+        )}
+      </div>
+    </ActiveStreamProvider>
   );
 };
