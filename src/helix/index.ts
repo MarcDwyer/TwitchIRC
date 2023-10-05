@@ -42,15 +42,10 @@ export class HelixAPI {
     return helixResponse.json();
   }
   async getUserData() {
-    if (this.userData) {
-      return this.userData;
-    }
     const url = new URL(HelixURLS.userData);
     url.searchParams.set("login", this.credentials.loginName);
-    console.log("called here");
     const response = await this.fetchHelix<UserDataResponse>(url.toString());
     checkIfError(response);
-    this.userData = response.data[0];
-    return this.userData;
+    return response.data[0];
   }
 }

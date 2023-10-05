@@ -1,22 +1,19 @@
-import { useTwitch } from "../../context/twitchCtx";
+import { useRecoilValue } from "recoil";
 import { BroadcastAll } from "./BroadcastAll";
 import { Follower } from "./Follower";
+import { followersState } from "../../selectors/followers";
 
 export const Followers = () => {
-  const { followers } = useTwitch();
+  const followers = useRecoilValue(followersState);
 
+  console.log({ followers });
   return (
-    <>
-      {!followers.streams ? (
-        <span>Getting followers...</span>
-      ) : (
-        <div className="flex flex-col bg-gray-800 w-1/6">
-          <BroadcastAll />
-          {followers.streams.map((stream) => (
-            <Follower key={stream.user_id} follower={stream} />
-          ))}
-        </div>
-      )}
-    </>
+    <div className="flex flex-col bg-gray-800 w-1/6">
+      {/* <BroadcastAll /> */}
+      {followers &&
+        followers.map((stream) => (
+          <Follower key={stream.user_id} follower={stream} />
+        ))}
+    </div>
   );
 };

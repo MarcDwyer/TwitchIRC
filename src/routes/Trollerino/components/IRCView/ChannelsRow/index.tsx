@@ -6,25 +6,19 @@ import {
   useActiveStreamActions,
 } from "../context/ActiveStreamCtx";
 
-type Props = {};
-
-export const ChannelsRow = ({}: Props) => {
+export const ChannelsRow = () => {
   const { joined } = useTwitch();
   const { activeStream } = useActiveStream();
   const { setStreamKey } = useActiveStreamActions();
 
   const streams = Array.from(joined.streams.values());
 
-  if (!activeStream) {
-    return null;
-  }
-
   return (
     <div className="w-full bg-gray-700 flex h-16">
       <>
         {streams.map((stream, index) => {
           const mentioned =
-            stream.mentioned && stream.keyName !== activeStream.keyName;
+            stream.mentioned && stream.keyName !== activeStream?.keyName;
           return (
             <div
               key={index}
