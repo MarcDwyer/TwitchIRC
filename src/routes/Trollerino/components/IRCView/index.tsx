@@ -1,34 +1,13 @@
-import { useTwitch } from "../../context/twitchCtx";
 import { ChannelsRow } from "./ChannelsRow";
-import {
-  ActiveStreamProvider,
-  useActiveStream,
-} from "./context/ActiveStreamCtx";
+import { ChatBox } from "./Chatbox";
 
-const IRCView = () => {
-  const { followers } = useTwitch();
-  const { activeStream } = useActiveStream();
-
+export const IRCView = () => {
   return (
     <>
-      {followers.streams && followers.streams.length && (
-        <div className="w-full h-full flex flex-col">
-          {activeStream ? (
-            <>
-              <ChannelsRow />
-              <IRCView />
-            </>
-          ) : null}
-        </div>
-      )}
+      <div className="w-full h-full flex flex-col">
+        <ChannelsRow />
+        <ChatBox />
+      </div>
     </>
-  );
-};
-
-export default () => {
-  return (
-    <ActiveStreamProvider>
-      <IRCView />
-    </ActiveStreamProvider>
   );
 };

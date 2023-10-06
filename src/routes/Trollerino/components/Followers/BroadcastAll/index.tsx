@@ -5,14 +5,13 @@ import { useTwitch } from "@src/routes/Trollerino/context/twitchCtx";
 
 export const BroadcastAll = () => {
   const { openModal, open, signal } = useModal<string>();
-  const { broadcast } = useTwitch().followers;
 
   const handleBroadcastClick = useCallback(async () => {
     try {
       const message = await openModal();
-      broadcast(message);
+      console.log({ message });
     } catch (e) {}
-  }, [openModal, broadcast]);
+  }, [openModal]);
 
   return (
     <div

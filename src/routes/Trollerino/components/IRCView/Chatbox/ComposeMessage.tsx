@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useActiveStreamActions } from "../context/ActiveStreamCtx";
 
 export function ComposeMessage() {
-  const { sendMsg } = useActiveStreamActions();
   const [newMessage, setNewMessage] = useState("");
 
   return (
@@ -10,7 +8,6 @@ export function ComposeMessage() {
       className="flex h-42"
       onSubmit={(e) => {
         e.preventDefault();
-        sendMsg(newMessage);
         setNewMessage("");
       }}
     >

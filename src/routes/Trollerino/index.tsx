@@ -1,12 +1,12 @@
 import { Suspense, useEffect, useState } from "react";
-import { TwitchProvider } from "./context/twitchCtx";
 import { Followers } from "./components/Followers/index";
-import IRCView from "./components/IRCView";
+import { IRCView } from "./components/IRCView";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { credentialsState } from "./atoms/credentials";
 import { ircSocketState } from "./selectors/twitchChat";
 import { msgParcer } from "@src/twitchChat/parser";
+import { messagesState } from "./atoms/messages";
 
 export type TwitchCredentials = {
   loginName: string;
@@ -15,8 +15,9 @@ export type TwitchCredentials = {
 
 export default function Trollerino() {
   const [creds, setCreds] = useRecoilState(credentialsState);
+  const [, setMessages] = useRecoilState(messagesState);
   const ws = useRecoilValue(ircSocketState);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [, setIsAuthenticated] = useState(false);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ export default function Trollerino() {
       if (!parsedMsg) {
         return;
       }
-
+      const { channel } = parsedMsg;
       switch (parsedMsg.command) {
         case "001":
           setIsAuthenticated(true);
@@ -64,8 +65,20 @@ export default function Trollerino() {
         case "PING":
           ws.send("PONG :tmi.twitch.tv");
           break;
+        case "PRIVMSG":
+          setMessages((currMsgs) => {
+            const messages = currMsgs.get(channel) ?? [];
+            return new Map(currMsgs).set(channel, [...messages, parsedMsg]);
+          });
+          break;
         default:
           console.log(`Unhandled command: ${parsedMsg.command}`, { parsedMsg });
+      }
+    };
+
+    return function () {
+      if (ws) {
+        ws.close();
       }
     };
   }, [ws, credentialsState]);
@@ -75,7 +88,7 @@ export default function Trollerino() {
       <Suspense fallback={<span>Loading followers...</span>}>
         <Followers />
       </Suspense>
-      {/* <IRCView /> */}
+      <IRCView />
       {/* <TwitchProvider token={creds.token} loginName={creds.loginName}>
         </TwitchProvider> */}
     </div>

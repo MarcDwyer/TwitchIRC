@@ -4,22 +4,14 @@ import { joinedState } from "../../atoms/joined";
 
 type Props = {
   follower: TwitchStream;
+  handleClick: () => void;
 };
 
-export const Follower = ({ follower }: Props) => {
-  // const { joined } = useTwitch();
-  const [_, setJoined] = useRecoilState(joinedState);
-
-  // const alreadyJoined = joined.checkIfJoined(follower.user_login);
-
-  const addStream = (stream: TwitchStream) => {};
-
+export const Follower = ({ follower, handleClick }: Props) => {
   return (
     <div
       onClick={() => {
-        // if (!alreadyJoined) {
-        //   joined.joinChannels([follower]);
-        // }
+        handleClick();
       }}
       className="w-full border-b-2 border-gray-500 h-20 flex hover:bg-gray-600 cursor-pointer"
     >
