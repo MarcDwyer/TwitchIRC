@@ -5,6 +5,7 @@ import { joinedState } from "@src/routes/Trollerino/atoms/joined";
 import { activeChannelState } from "@src/routes/Trollerino/atoms/activeChannel";
 import { ircSocketState } from "@src/routes/Trollerino/selectors/twitchChat";
 import { messagesState } from "@src/routes/Trollerino/atoms/messages";
+import { useEffect, useMemo } from "react";
 
 export const ChannelsRow = () => {
   const [joined, setJoined] = useRecoilState(joinedState);
@@ -12,7 +13,13 @@ export const ChannelsRow = () => {
   const [, setMessages] = useRecoilState(messagesState);
   const ws = useRecoilValue(ircSocketState);
 
-  const streams = Array.from(joined.values());
+  const streams = useMemo(() => Array.from(joined.values()), [joined]);
+
+  useEffect(() => {
+    if (!activeChannel && streams.length) {
+      setActiveChannel(streams[streams.length - 1]);
+    }
+  }, [activeChannel, streams]);
 
   return (
     <div className="w-full bg-gray-700 flex h-16">

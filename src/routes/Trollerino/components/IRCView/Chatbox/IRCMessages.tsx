@@ -9,7 +9,7 @@ export function IRCMessages() {
   const activeMessages = messages.get(activeChannel?.channelName ?? "");
 
   return (
-    <div className="h-5/6 w-5/6 overflow-y-auto m-auto border-2">
+    <div className="overflow-y-auto m-auto w-11/12 overflow-x-hidden mt-5 mb-5 h-full">
       {activeMessages &&
         activeMessages.map((message, index) => {
           const color = message.tags.color;

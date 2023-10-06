@@ -12,6 +12,7 @@ export type TwitchCredentials = {
   loginName: string;
   token: string;
 };
+const MAX_MSG_LEN = 150;
 
 export default function Trollerino() {
   const [creds, setCreds] = useRecoilState(credentialsState);
@@ -67,7 +68,10 @@ export default function Trollerino() {
           break;
         case "PRIVMSG":
           setMessages((currMsgs) => {
-            const messages = currMsgs.get(channel) ?? [];
+            let messages = currMsgs.get(channel) ?? [];
+            if (messages.length >= MAX_MSG_LEN) {
+              messages = messages.slice(0, MAX_MSG_LEN);
+            }
             return new Map(currMsgs).set(channel, [...messages, parsedMsg]);
           });
           break;
