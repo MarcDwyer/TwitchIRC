@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useJoined } from "./useJoined";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { activeChannelNameState } from "../atoms/activeChannelName";
-import { ircSocketState } from "../selectors/twitchChat";
 import { createIRCMessage } from "../utils/createIrcMessage";
 import { credentialsState } from "../atoms/credentials";
+import { ircSocketState } from "../atoms/ircSocket";
 
 export const useActiveChannel = () => {
   const [activeChannelName, setActiveChannelName] = useRecoilState(

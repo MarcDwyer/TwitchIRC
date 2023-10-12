@@ -1,9 +1,9 @@
 import { useRecoilState, useRecoilValue } from "recoil";
 import { createJoinedAtomVal, joinedState } from "../atoms/joined";
-import { ircSocketState } from "../selectors/twitchChat";
 import { TwitchStream } from "@src/helix/types/liveFollowers";
 import { useCallback } from "react";
 import { IrcMessage } from "@src/twitchChat/twitch_data";
+import { ircSocketState } from "../atoms/ircSocket";
 
 const MAX_MSG_LEN = 150;
 
@@ -20,13 +20,14 @@ export const useJoined = () => {
       if (!ws) {
         return;
       }
+      console.log({ channelName });
       ws.send(`JOIN ${channelName}`);
       const newlyJoined = createJoinedAtomVal(channelName, stream);
 
       setJoined(new Map(joined).set(channelName, newlyJoined));
       return newlyJoined;
     },
-    [ws, setJoined]
+    [ws, setJoined, joined]
   );
 
   const part = useCallback(
@@ -39,12 +40,13 @@ export const useJoined = () => {
       updatedJoined.delete(channelName);
       setJoined(updatedJoined);
     },
-    [setJoined]
+    [setJoined, joined]
   );
 
   const addMsg = useCallback(
     (msg: IrcMessage) => {
       const channel = joined.get(msg.channel);
+      console.log({ channel, msg, joined });
       if (channel) {
         let msgs = [...channel.messages, msg];
         if (msgs.length >= MAX_MSG_LEN) {

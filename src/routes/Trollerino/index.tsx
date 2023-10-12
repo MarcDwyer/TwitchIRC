@@ -2,10 +2,9 @@ import { Suspense, useEffect } from "react";
 import { Followers } from "./components/Followers/index";
 import { IRCView } from "./components/IRCView";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import { credentialsState } from "./atoms/credentials";
-import { ircSocketState } from "./selectors/twitchChat";
-import { useWSEvents } from "./hooks/useWSEvents";
+import { useIRCWebsocket } from "./hooks/useIRCWebsocket";
 
 export type TwitchCredentials = {
   loginName: string;
@@ -14,9 +13,8 @@ export type TwitchCredentials = {
 
 export default function Trollerino() {
   const [, setCreds] = useRecoilState(credentialsState);
-  const ws = useRecoilValue(ircSocketState);
 
-  useWSEvents(ws);
+  useIRCWebsocket();
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();

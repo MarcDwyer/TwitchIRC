@@ -2,10 +2,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { joinedState } from "@src/routes/Trollerino/atoms/joined";
-import { ircSocketState } from "@src/routes/Trollerino/selectors/twitchChat";
 import { messagesState } from "@src/routes/Trollerino/atoms/messages";
 import { useMemo } from "react";
 import { useActiveChannel } from "../../hooks/useActiveChannel";
+import { ircSocketState } from "../../atoms/ircSocket";
 
 export const JoinedTabs = () => {
   const [joined, setJoined] = useRecoilState(joinedState);

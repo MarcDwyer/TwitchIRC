@@ -1,6 +1,4 @@
 import { TwitchStream } from "@src/helix/types/liveFollowers";
-import { useRecoilState } from "recoil";
-import { joinedState } from "../../atoms/joined";
 
 type Props = {
   follower: TwitchStream;
