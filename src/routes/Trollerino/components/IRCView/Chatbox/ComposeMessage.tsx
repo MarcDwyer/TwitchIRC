@@ -1,16 +1,9 @@
-import { activeChannelState } from "@src/routes/Trollerino/atoms/activeChannelName";
-import { credentialsState } from "@src/routes/Trollerino/atoms/credentials";
-import { messagesState } from "@src/routes/Trollerino/atoms/messages";
-import { ircSocketState } from "@src/routes/Trollerino/selectors/twitchChat";
-import { createIRCMessage } from "@src/routes/Trollerino/utils/createIrcMessage";
 import { useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
 
-export function ComposeMessage() {
-  const activeChannel = useRecoilValue(activeChannelState);
-  const ws = useRecoilValue(ircSocketState);
-  const creds = useRecoilValue(credentialsState);
-  const [, setMessages] = useRecoilState(messagesState);
+type Props = {
+  send: (msg: string) => void;
+};
+export function ComposeMessage({ send }: Props) {
   const [newMessage, setNewMessage] = useState("");
 
   return (
@@ -18,22 +11,7 @@ export function ComposeMessage() {
       className="flex h-42"
       onSubmit={(e) => {
         e.preventDefault();
-        if (ws && activeChannel) {
-          const query = `PRIVMSG ${activeChannel.channelName} :${newMessage}`;
-          ws.send(query);
-          setMessages((currMsgs) => {
-            const msgs = currMsgs.get(activeChannel.channelName);
-            if (!msgs || !creds) return currMsgs;
-            msgs.push(
-              createIRCMessage({
-                username: creds?.loginName,
-                channelName: activeChannel.channelName,
-                message: newMessage,
-              })
-            );
-            return new Map(currMsgs).set(activeChannel.channelName, msgs);
-          });
-        }
+        send(newMessage);
         setNewMessage("");
       }}
     >

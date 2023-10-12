@@ -2,14 +2,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { joinedState } from "@src/routes/Trollerino/atoms/joined";
-import { activeChannelState } from "@src/routes/Trollerino/atoms/activeChannelName";
 import { ircSocketState } from "@src/routes/Trollerino/selectors/twitchChat";
 import { messagesState } from "@src/routes/Trollerino/atoms/messages";
 import { useMemo } from "react";
+import { useActiveChannel } from "../../hooks/useActiveChannel";
 
 export const JoinedTabs = () => {
   const [joined, setJoined] = useRecoilState(joinedState);
-  const activeChannel = useRecoilValue(activeChannelState);
+  const { activeChannel, setActiveChannelName } = useActiveChannel();
   const [, setMessages] = useRecoilState(messagesState);
   const ws = useRecoilValue(ircSocketState);
 
@@ -58,7 +58,7 @@ export const JoinedTabs = () => {
                   className="w-full flex p-2"
                   onClick={() => {
                     // set active channel
-                    setActiveChannel(stream);
+                    setActiveChannelName(stream.channelName);
                   }}
                 >
                   <span className="truncate m-auto">
