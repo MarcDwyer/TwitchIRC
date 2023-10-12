@@ -1,5 +1,5 @@
 import { useRecoilValue } from "recoil";
-import { activeChannelState } from "@src/routes/Trollerino/atoms/activeChannel";
+import { activeChannelState } from "@src/routes/Trollerino/atoms/activeChannelName";
 import { messagesState } from "@src/routes/Trollerino/atoms/messages";
 
 export function IRCMessages() {

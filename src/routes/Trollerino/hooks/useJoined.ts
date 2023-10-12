@@ -1,121 +1,66 @@
-import { useCallback, useReducer } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { createJoinedAtomVal, joinedState } from "../atoms/joined";
+import { ircSocketState } from "../selectors/twitchChat";
 import { TwitchStream } from "@src/helix/types/liveFollowers";
-import { TwitchChat } from "@src/twitchChat/twitch_chat";
+import { useCallback } from "react";
 import { IrcMessage } from "@src/twitchChat/twitch_data";
-import { getChannelName } from "@src/twitchChat/util";
-import {
-  ADD_CHANNEL_AND_STREAM,
-  ADD_MESSAGE,
-  DELETE_CHANNEL_AND_STREAM,
-  InitialJoinState,
-  JoinedReducer,
-  JoinedValue,
-  SET_MENTIONED,
-} from "../reducers/JoinedReducer";
-import { Channel, ChannelEvents } from "@src/twitchChat/channel";
-import { checkIfMentioned } from "../utils/checkIfMentioned";
 
-export type UseJoined = ReturnType<typeof useJoined>;
+const MAX_MSG_LEN = 150;
 
-const usedEvents: ChannelEvents[] = ["privmsg"];
+export const useJoined = () => {
+  const [joined, setJoined] = useRecoilState(joinedState);
+  const ws = useRecoilValue(ircSocketState);
 
-const removeListeners = (channel: Channel, evts: ChannelEvents[]) => {
-  for (const evt of evts) {
-    channel.removeEventListener(evt);
-  }
-};
-
-export const useJoined = (chatAPI: TwitchChat | null, loginName: string) => {
-  const [streams, dispatch] = useReducer(JoinedReducer, InitialJoinState);
-
-  const setMentioned = useCallback(
-    (keyName: string, mentioned: boolean) => {
-      dispatch({
-        type: SET_MENTIONED,
-        payload: { keyName, mentioned },
-      });
-    },
-    [dispatch]
-  );
-
-  const addListeners = useCallback(
-    ({ channel, keyName }: JoinedValue) => {
-      channel.addEventListener("privmsg", (msg) => {
-        if (checkIfMentioned(msg.message, loginName)) {
-          setMentioned(keyName, true);
-        }
-        addMessage(keyName, msg);
-      });
-    },
-    [dispatch, setMentioned]
-  );
-  // streams is an array due to the broadcast all feature
-  const joinChannels = (twitchStreams: TwitchStream[]) => {
-    if (!chatAPI) {
-      throw new Error("Twitch Chat has not been set");
-    }
-    for (const stream of twitchStreams) {
-      const channelName = getChannelName(stream.user_login);
-
-      if (streams.has(channelName)) {
-        continue;
+  const join = useCallback(
+    (stream: TwitchStream) => {
+      let channelName = stream.user_login;
+      if (channelName[0] !== "#") {
+        channelName = "#" + channelName;
       }
-      const [channel] = chatAPI.joinChannel(stream.user_login);
+      if (!ws) {
+        return;
+      }
+      ws.send(`JOIN ${channelName}`);
+      const newlyJoined = createJoinedAtomVal(channelName, stream);
 
-      const joinedValue: JoinedValue = {
-        channel,
-        streamInfo: stream,
-        messages: [],
-        keyName: channelName,
-        mentioned: false,
-      };
-
-      addListeners(joinedValue);
-
-      dispatch({
-        type: ADD_CHANNEL_AND_STREAM,
-        payload: {
-          channelName,
-          joinedValue,
-        },
-      });
-    }
-  };
-
-  const partChannel = (channelName: string) => {
-    if (!chatAPI) {
-      throw new Error("Twitch Chat has not been set");
-    }
-    const joinedStream = streams.get(channelName);
-    if (joinedStream) {
-      removeListeners(joinedStream.channel, usedEvents);
-      joinedStream.channel.part();
-    }
-    dispatch({ type: DELETE_CHANNEL_AND_STREAM, payload: { channelName } });
-  };
-
-  const checkIfJoined = (channelName: string) => {
-    channelName = getChannelName(channelName);
-
-    return streams.has(channelName);
-  };
-
-  const addMessage = useCallback(
-    (channelName: string, message: IrcMessage) => {
-      dispatch({
-        type: ADD_MESSAGE,
-        payload: { channelName, message },
-      });
+      setJoined(new Map(joined).set(channelName, newlyJoined));
+      return newlyJoined;
     },
-    [dispatch]
+    [ws, setJoined]
   );
 
+  const part = useCallback(
+    (channelName: string) => {
+      if (!ws) {
+        return;
+      }
+      ws.send(`PART ${channelName}`);
+      const updatedJoined = new Map(joined);
+      updatedJoined.delete(channelName);
+      setJoined(updatedJoined);
+    },
+    [setJoined]
+  );
+
+  const addMsg = useCallback(
+    (msg: IrcMessage) => {
+      const channel = joined.get(msg.channel);
+      if (channel) {
+        let msgs = [...channel.messages, msg];
+        if (msgs.length >= MAX_MSG_LEN) {
+          msgs = msgs.slice(1, msgs.length);
+        }
+        setJoined(
+          new Map(joined).set(msg.channel, { ...channel, messages: msgs })
+        );
+      }
+    },
+    [joined, setJoined]
+  );
   return {
-    setMentioned,
-    checkIfJoined,
-    partChannel,
-    joinChannels,
-    addMessage,
-    streams,
+    join,
+    part,
+    joined,
+    addMsg,
   };
 };

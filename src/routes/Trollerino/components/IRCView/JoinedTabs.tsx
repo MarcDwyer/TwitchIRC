@@ -2,24 +2,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { joinedState } from "@src/routes/Trollerino/atoms/joined";
-import { activeChannelState } from "@src/routes/Trollerino/atoms/activeChannel";
+import { activeChannelState } from "@src/routes/Trollerino/atoms/activeChannelName";
 import { ircSocketState } from "@src/routes/Trollerino/selectors/twitchChat";
 import { messagesState } from "@src/routes/Trollerino/atoms/messages";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
-export const ChannelsRow = () => {
+export const JoinedTabs = () => {
   const [joined, setJoined] = useRecoilState(joinedState);
-  const [activeChannel, setActiveChannel] = useRecoilState(activeChannelState);
+  const activeChannel = useRecoilValue(activeChannelState);
   const [, setMessages] = useRecoilState(messagesState);
   const ws = useRecoilValue(ircSocketState);
 
   const streams = useMemo(() => Array.from(joined.values()), [joined]);
-
-  useEffect(() => {
-    if (!activeChannel && streams.length) {
-      setActiveChannel(streams[streams.length - 1]);
-    }
-  }, [activeChannel, streams]);
 
   return (
     <div className="w-full bg-gray-700 flex h-16">
