@@ -13,9 +13,6 @@ export const JoinedTabs = () => {
     <div className="w-full bg-gray-700 flex h-16">
       <>
         {streams.map((stream, index) => {
-          const mentioned =
-            stream.mentioned &&
-            stream.channelName !== activeChannel?.channelName;
           return (
             <div
               key={index}
@@ -24,7 +21,7 @@ export const JoinedTabs = () => {
                 stream.channelName === activeChannel?.channelName
                   ? "bg-gray-500 text-white"
                   : ""
-              } ${mentioned ? "bg-orange-500" : ""}`}
+              } ${stream.mentioned ? "bg-orange-500" : ""}`}
             >
               <div className="flex flex-col">
                 <div

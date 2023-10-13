@@ -46,10 +46,18 @@ export const useActiveChannel = () => {
     [activeChannel, ws, creds, addMsg]
   );
 
+  const linkToStream = useMemo(() => {
+    if (!activeChannel) {
+      return null;
+    }
+    const link = "https://twitch.tv/" + activeChannel.streamData.user_name;
+    return link;
+  }, [activeChannel]);
   return {
     setActiveChannelName,
     activeChannel,
     addMsg,
     send,
+    linkToStream,
   };
 };
