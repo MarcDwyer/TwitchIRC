@@ -38,8 +38,8 @@ export default function Trollerino() {
     <div className="h-full w-full flex">
       <Suspense fallback={<span>Loading followers...</span>}>
         <Followers />
+        <IRCView />
       </Suspense>
-      <IRCView />
     </div>
   );
 }

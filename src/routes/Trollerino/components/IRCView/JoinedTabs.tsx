@@ -5,7 +5,7 @@ import { useActiveChannel } from "../../hooks/useActiveChannel";
 import { useJoined } from "../../hooks/useJoined";
 
 export const JoinedTabs = () => {
-  const { activeChannel, setActiveChannelName } = useActiveChannel();
+  const { activeChannel, setActiveChannel } = useActiveChannel();
   const { joined, part } = useJoined();
   const streams = useMemo(() => Array.from(joined.values()), [joined]);
 
@@ -36,7 +36,7 @@ export const JoinedTabs = () => {
                   className="w-full flex p-2"
                   onClick={() => {
                     // set active channel
-                    setActiveChannelName(stream.channelName);
+                    setActiveChannel(stream.channelName);
                   }}
                 >
                   <span className="truncate m-auto">

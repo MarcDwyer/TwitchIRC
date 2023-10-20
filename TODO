@@ -1,1 +1,2 @@
 ☐ Make messages local. If they're global it may cause unneeded rerenders. Find an alternate path @started(23-10-03 21:14)
+☐ Pause chat when scrolling

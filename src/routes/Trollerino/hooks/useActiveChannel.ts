@@ -7,13 +7,13 @@ import { credentialsState } from "../atoms/credentials";
 import { ircSocketState } from "../atoms/ircSocket";
 
 export const useActiveChannel = () => {
-  const [activeChannelName, setActiveChannelName] = useRecoilState(
+  const [activeChannelName, _setActiveChannelName] = useRecoilState(
     activeChannelNameState
   );
   const ws = useRecoilValue(ircSocketState);
   const creds = useRecoilValue(credentialsState);
 
-  const { joined, addMsg } = useJoined();
+  const { joined, addMsg, setJoined } = useJoined();
 
   const activeChannel = useMemo(() => {
     if (!activeChannelName) {
@@ -25,7 +25,7 @@ export const useActiveChannel = () => {
   useEffect(() => {
     if (!activeChannel && joined.size) {
       const { channelName } = Array.from(joined.values())[0];
-      setActiveChannelName(channelName);
+      _setActiveChannelName(channelName);
     }
   }, [activeChannel, joined]);
 
@@ -53,11 +53,28 @@ export const useActiveChannel = () => {
     const link = "https://twitch.tv/" + activeChannel.streamData.user_name;
     return link;
   }, [activeChannel]);
+
+  const setActiveChannel = (channelName: string) =>
+    _setActiveChannelName(channelName);
+
+  const setPaused = useCallback(
+    (paused: boolean) => {
+      if (!activeChannelName) return;
+      const channel = joined.get(activeChannelName);
+      if (channel) {
+        const updatedChannel = Object.assign({ paused }, channel);
+        setJoined(new Map(joined).set(activeChannelName, updatedChannel));
+      }
+    },
+    [joined, setJoined, activeChannelName]
+  );
+
   return {
-    setActiveChannelName,
+    setActiveChannel,
     activeChannel,
     addMsg,
     send,
     linkToStream,
+    setPaused,
   };
 };

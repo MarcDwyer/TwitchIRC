@@ -7,6 +7,7 @@ export type JoinedAtomValue = {
   streamData: TwitchStream;
   mentioned: boolean;
   messages: IrcMessage[];
+  paused: boolean;
 };
 
 export const createJoinedAtomVal = (
@@ -17,6 +18,7 @@ export const createJoinedAtomVal = (
   streamData: stream,
   mentioned: false,
   messages: [],
+  paused: false,
 });
 
 export const joinedState = atom<Map<string, JoinedAtomValue>>({
