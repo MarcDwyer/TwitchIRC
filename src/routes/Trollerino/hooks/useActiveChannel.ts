@@ -13,7 +13,7 @@ export const useActiveChannel = () => {
   const ws = useRecoilValue(ircSocketState);
   const creds = useRecoilValue(credentialsState);
 
-  const { joined, addMsg, setJoined } = useJoined();
+  const { joined, addMsg, setPaused } = useJoined();
 
   const activeChannel = useMemo(() => {
     if (!activeChannelName) {
@@ -33,7 +33,6 @@ export const useActiveChannel = () => {
     (msg: string) => {
       if (ws && creds && activeChannel) {
         ws.send(`PRIVMSG ${activeChannel?.channelName} :${msg}`);
-
         // Need to manually add own user message. Not sure how to do this via IRC events
         const ircMsg = createIRCMessage({
           username: creds.loginName,
@@ -57,24 +56,25 @@ export const useActiveChannel = () => {
   const setActiveChannel = (channelName: string) =>
     _setActiveChannelName(channelName);
 
-  const setPaused = useCallback(
-    (paused: boolean) => {
-      if (!activeChannelName) return;
-      const channel = joined.get(activeChannelName);
-      if (channel) {
-        const updatedChannel = Object.assign({ paused }, channel);
-        setJoined(new Map(joined).set(activeChannelName, updatedChannel));
-      }
-    },
-    [joined, setJoined, activeChannelName]
-  );
+  const pause = useCallback(() => {
+    if (activeChannelName) {
+      setPaused(true, activeChannelName);
+    }
+  }, [activeChannelName, setPaused]);
+
+  const unpause = useCallback(() => {
+    if (activeChannelName) {
+      setPaused(false, activeChannelName);
+    }
+  }, [activeChannelName, setPaused]);
 
   return {
+    pause,
+    unpause,
     setActiveChannel,
     activeChannel,
     addMsg,
     send,
     linkToStream,
-    setPaused,
   };
 };

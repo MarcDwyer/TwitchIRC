@@ -4,7 +4,8 @@ import { useActiveChannel } from "@src/routes/Trollerino/hooks/useActiveChannel"
 import { TwitchLink } from "@src/components/TwitchLink";
 
 export const ChatBox = () => {
-  const { activeChannel, send, linkToStream, setPaused } = useActiveChannel();
+  const { activeChannel, send, linkToStream, pause, unpause } =
+    useActiveChannel();
   return (
     <>
       {activeChannel && (
@@ -18,7 +19,14 @@ export const ChatBox = () => {
               />
             )}
           </div>
-          <IRCMessages activeChannel={activeChannel} setPaused={setPaused} />
+          {activeChannel.paused && (
+            <button onClick={unpause}>Chat Paused: Click to unpause</button>
+          )}
+          <IRCMessages
+            activeChannel={activeChannel}
+            pause={pause}
+            unpause={unpause}
+          />
           <ComposeMessage send={send} />
         </>
       )}

@@ -57,8 +57,18 @@ export const useJoined = () => {
     },
     [joined, setJoined]
   );
-
+  const setPaused = useCallback(
+    (paused: boolean, channelName: string) => {
+      const channel = joined.get(channelName);
+      if (channel) {
+        const updatedChannel = { ...channel, paused };
+        setJoined(new Map(joined).set(channelName, updatedChannel));
+      }
+    },
+    [joined, setJoined]
+  );
   return {
+    setPaused,
     join,
     part,
     joined,
