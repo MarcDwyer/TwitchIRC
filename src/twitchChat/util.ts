@@ -2,6 +2,7 @@ import { Badges } from "./twitch_data";
 
 export interface Deferred<T> extends Promise<T> {
   resolve: (value?: T | PromiseLike<T>) => void;
+  reject: () => void;
 }
 export function deferred<T>(): Deferred<T> {
   let methods;

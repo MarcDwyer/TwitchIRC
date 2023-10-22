@@ -1,14 +1,20 @@
-import { useRecoilValue } from "recoil";
 import { BroadcastAll } from "./BroadcastAll";
 import { Follower } from "./Follower";
-import { followersState } from "../../selectors/followers";
 import { useJoined } from "../../hooks/useJoined";
 import { useActiveChannel } from "../../hooks/useActiveChannel";
+import { useFollowers } from "../../hooks/useFollowers";
+import { useEffect } from "react";
 
 export const Followers = () => {
-  const followers = useRecoilValue(followersState);
   const { join } = useJoined();
   const { setActiveChannel } = useActiveChannel();
+  const { getFollowers, followers } = useFollowers();
+
+  useEffect(() => {
+    if (!followers) {
+      getFollowers();
+    }
+  }, [followers, getFollowers]);
 
   return (
     <div className="flex flex-col bg-gray-800 w-48 flex-none">

@@ -1,19 +1,20 @@
-import { useRecoilState, useRecoilValue } from "recoil";
-import { useEffect } from "react";
-import { credentialsState } from "../atoms/credentials";
+import { useRecoilState } from "recoil";
+import { useCallback, useEffect } from "react";
 import { msgParcer } from "@src/twitchChat/parser";
 import { useJoined } from "./useJoined";
 import { SecureIrcUrl } from "@src/twitchChat/twitch_data";
 import { ircSocketState } from "../atoms/ircSocket";
+import { TwitchCredentials } from "..";
+
+export type TwitchConnect = (creds: TwitchCredentials) => Promise<WebSocket>;
 
 export const useIRCWebsocket = () => {
-  const creds = useRecoilValue(credentialsState);
   const { addMsg } = useJoined();
   const [websocket, setWs] = useRecoilState(ircSocketState);
 
-  useEffect(() => {
-    if (creds) {
-      const ws = websocket ?? new WebSocket(SecureIrcUrl);
+  const connect = useCallback(
+    (creds: TwitchCredentials) => {
+      const ws = new WebSocket(SecureIrcUrl);
       ws.onopen = () => {
         ws.send(
           "CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands"
@@ -27,6 +28,7 @@ export const useIRCWebsocket = () => {
         if (!parsedMsg) {
           return;
         }
+        console.log({ parsedMsg });
         switch (parsedMsg.command) {
           case "001":
             //successfully authenticated & connected
@@ -48,22 +50,23 @@ export const useIRCWebsocket = () => {
               console.error(parsedMsg.raw);
             }
             break;
-          default:
-            console.log(`Unhandled command: ${parsedMsg.command}`, {
-              parsedMsg,
-            });
         }
       };
-    }
-  }, [setWs, addMsg, creds, websocket]);
+    },
+    [setWs, addMsg]
+  );
 
   useEffect(() => {
     return function () {
       if (websocket) {
+        console.log("CLOSING");
         websocket.close();
       }
     };
   }, [websocket]);
 
-  return websocket;
+  return {
+    websocket,
+    connect,
+  };
 };

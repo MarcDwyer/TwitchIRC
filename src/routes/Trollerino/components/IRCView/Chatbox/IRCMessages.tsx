@@ -1,5 +1,5 @@
 import { JoinedAtomValue } from "@src/routes/Trollerino/atoms/joined";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useChatPause } from "./hooks/useChatPause";
 
 type Props = {

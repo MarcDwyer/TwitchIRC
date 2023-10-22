@@ -12,9 +12,9 @@ export type TwitchCredentials = {
 };
 
 export default function Trollerino() {
-  const [, setCreds] = useRecoilState(credentialsState);
+  const [creds, setCreds] = useRecoilState(credentialsState);
 
-  useIRCWebsocket();
+  const { connect, websocket } = useIRCWebsocket();
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -32,14 +32,19 @@ export default function Trollerino() {
     } else {
       navigate("/");
     }
-  }, [searchParams, setCreds, setCreds]);
+  }, [searchParams, setCreds, setCreds, connect]);
 
+  useEffect(() => {
+    if (creds && !websocket) {
+      connect(creds);
+    }
+  }, [connect, creds, websocket]);
   return (
     <div className="h-full w-full flex">
       <Suspense fallback={<span>Loading followers...</span>}>
         <Followers />
-        <IRCView />
       </Suspense>
+      <IRCView />
     </div>
   );
 }

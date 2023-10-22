@@ -20,7 +20,14 @@ export const ChatBox = () => {
             )}
           </div>
           {activeChannel.paused && (
-            <button onClick={unpause}>Chat Paused: Click to unpause</button>
+            <div className="flex w-full">
+              <button
+                className="m-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+                onClick={unpause}
+              >
+                Chat Paused: Click to unpause
+              </button>
+            </div>
           )}
           <IRCMessages
             activeChannel={activeChannel}
