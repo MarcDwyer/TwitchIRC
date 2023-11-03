@@ -12,9 +12,7 @@ export type TwitchCredentials = {
 };
 
 export default function Trollerino() {
-  const [creds, setCreds] = useRecoilState(credentialsState);
-
-  const { connect, websocket } = useIRCWebsocket();
+  const [, setCreds] = useRecoilState(credentialsState);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -32,13 +30,8 @@ export default function Trollerino() {
     } else {
       navigate("/");
     }
-  }, [searchParams, setCreds, setCreds, connect]);
+  }, [searchParams, setCreds, setCreds]);
 
-  useEffect(() => {
-    if (creds && !websocket) {
-      connect(creds);
-    }
-  }, [connect, creds, websocket]);
   return (
     <div className="h-full w-full flex">
       <Suspense fallback={<span>Loading followers...</span>}>

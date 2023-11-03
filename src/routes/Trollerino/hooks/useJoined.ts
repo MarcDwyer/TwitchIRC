@@ -28,7 +28,6 @@ export const useJoined = () => {
     },
     [ws, setJoined, joined]
   );
-
   const part = useCallback(
     (channelName: string) => {
       if (!ws) {
@@ -45,6 +44,7 @@ export const useJoined = () => {
   const addMsg = useCallback(
     (msg: IrcMessage) => {
       const channel = joined.get(msg.channel);
+      console.log({ channel, joined, msg });
       if (channel && !channel.paused) {
         let msgs = [...channel.messages, msg];
         if (msgs.length >= MAX_MSG_LEN) {
