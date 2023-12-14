@@ -17,13 +17,16 @@ export const useJoined = () => {
       if (channelName[0] !== "#") {
         channelName = "#" + channelName;
       }
+      console.log({ ws });
       if (!ws) {
         return;
       }
       ws.send(`JOIN ${channelName}`);
       const newlyJoined = createJoinedAtomVal(channelName, stream);
 
-      setJoined(new Map(joined).set(channelName, newlyJoined));
+      const newJoined = new Map(joined).set(channelName, newlyJoined);
+      setJoined(newJoined);
+      console.log({ newJoined });
       return newlyJoined;
     },
     [ws, setJoined, joined]

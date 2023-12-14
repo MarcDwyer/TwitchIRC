@@ -17,6 +17,8 @@ export default function Trollerino() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  useIRCWebsocket();
+
   useEffect(() => {
     const accessToken = searchParams.get("access_token");
     const loginName = searchParams.get("loginName");

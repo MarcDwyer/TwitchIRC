@@ -57,6 +57,7 @@ export const useIRCWebsocket = () => {
 
   useEffect(() => {
     if (!websocket) {
+      console.log("this ran...");
       setWs(new WebSocket(SecureIrcUrl));
     }
   }, [websocket, setWs]);

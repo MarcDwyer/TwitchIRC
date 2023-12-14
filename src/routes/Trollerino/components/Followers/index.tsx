@@ -24,6 +24,7 @@ export const Followers = () => {
           <Follower
             handleClick={() => {
               const joined = join(stream);
+              console.log({ joined });
               if (joined) {
                 setActiveChannel(joined.channelName);
               }
