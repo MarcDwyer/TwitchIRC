@@ -4,20 +4,25 @@ import { TwitchStream } from "@src/helix/types/liveFollowers";
 import { useCallback } from "react";
 import { IrcMessage } from "@src/twitchChat/twitch_data";
 import { ircSocketState } from "../atoms/ircSocket";
+import { useFollowers } from "./useFollowers";
+import { createChannelName } from "../utils/createChannelname";
+import { createIRCMessage } from "../utils/createIrcMessage";
+import { credentialsState } from "../atoms/credentials";
 
 const MAX_MSG_LEN = 350;
 
 export const useJoined = () => {
   const [joined, setJoined] = useRecoilState(joinedState);
   const ws = useRecoilValue(ircSocketState);
+  const creds = useRecoilValue(credentialsState);
+  const { followers } = useFollowers();
 
   const join = useCallback(
     (stream: TwitchStream) => {
-      let channelName = stream.user_login;
-      if (channelName[0] !== "#") {
-        channelName = "#" + channelName;
+      const channelName = createChannelName(stream.user_login);
+      if (joined.has(channelName)) {
+        return joined.get(channelName);
       }
-      console.log({ ws });
       if (!ws) {
         return;
       }
@@ -26,7 +31,6 @@ export const useJoined = () => {
 
       const newJoined = new Map(joined).set(channelName, newlyJoined);
       setJoined(newJoined);
-      console.log({ newJoined });
       return newlyJoined;
     },
     [ws, setJoined, joined]
@@ -47,7 +51,6 @@ export const useJoined = () => {
   const addMsg = useCallback(
     (msg: IrcMessage) => {
       const channel = joined.get(msg.channel);
-      console.log({ channel, joined, msg });
       if (channel && !channel.paused) {
         let msgs = [...channel.messages, msg];
         if (msgs.length >= MAX_MSG_LEN) {
@@ -70,6 +73,41 @@ export const useJoined = () => {
     },
     [joined, setJoined]
   );
+  const bulkJoin = useCallback(
+    (streams: TwitchStream[]) => {
+      const newJoined = new Map(joined);
+
+      for (const stream of streams) {
+        const channelName = createChannelName(stream.user_login);
+
+        if (!newJoined.has(channelName)) {
+          newJoined.set(channelName, createJoinedAtomVal(channelName, stream));
+        }
+      }
+      return newJoined;
+    },
+    [joined]
+  );
+
+  const broadcast = useCallback(
+    (message: string) => {
+      if (!followers || !ws || !creds) {
+        return;
+      }
+      const updatedJoined = bulkJoin(followers);
+      for (const [channelName, joinedChan] of updatedJoined.entries()) {
+        const ircMsg = createIRCMessage({
+          username: creds.loginName,
+          message,
+          channelName,
+        });
+        joinedChan.messages.push(ircMsg);
+        ws.send(`PRIVMSG ${channelName} :${message}`);
+      }
+      setJoined(updatedJoined);
+    },
+    [bulkJoin, creds, ws]
+  );
   return {
     setPaused,
     join,
@@ -77,5 +115,6 @@ export const useJoined = () => {
     joined,
     addMsg,
     setJoined,
+    broadcast,
   };
 };

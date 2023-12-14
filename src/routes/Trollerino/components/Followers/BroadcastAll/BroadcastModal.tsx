@@ -3,20 +3,19 @@ import { Modal, Button } from "flowbite-react";
 import { useState } from "react";
 
 type Props = {
-  signal: Deferred<string>;
   open: boolean;
+  onSubmit: (message: string) => void;
+  closeModal: () => void;
 };
 
-export const BroadcastModal = ({ signal, open }: Props) => {
+export const BroadcastModal = ({ closeModal, open, onSubmit }: Props) => {
   const [message, setMessage] = useState("");
 
   return (
     <Modal
+      onClose={closeModal}
       position="center"
       show={open}
-      onClose={() => {
-        signal.reject();
-      }}
       className="text-white"
     >
       <Modal.Header as={"span"} className="bg-gray-700">
@@ -26,8 +25,8 @@ export const BroadcastModal = ({ signal, open }: Props) => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            signal.resolve(message);
-            setMessage("");
+            onSubmit(message);
+            closeModal();
           }}
         >
           <input

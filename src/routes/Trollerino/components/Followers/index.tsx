@@ -3,18 +3,11 @@ import { Follower } from "./Follower";
 import { useJoined } from "../../hooks/useJoined";
 import { useActiveChannel } from "../../hooks/useActiveChannel";
 import { useFollowers } from "../../hooks/useFollowers";
-import { useEffect } from "react";
 
 export const Followers = () => {
   const { join } = useJoined();
   const { setActiveChannel } = useActiveChannel();
-  const { getFollowers, followers } = useFollowers();
-
-  useEffect(() => {
-    if (!followers) {
-      getFollowers();
-    }
-  }, [followers, getFollowers]);
+  const { followers } = useFollowers();
 
   return (
     <div className="flex flex-col bg-gray-800 w-48 flex-none">

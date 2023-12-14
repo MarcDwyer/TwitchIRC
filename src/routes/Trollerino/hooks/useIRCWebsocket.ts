@@ -46,6 +46,7 @@ export const useIRCWebsocket = () => {
           break;
         case "NOTICE":
           if (parsedMsg.raw.includes("failed")) {
+            console.log("Websocket failed... closing");
             websocket.close();
             setWs(null);
             console.error(parsedMsg.raw);
@@ -57,7 +58,6 @@ export const useIRCWebsocket = () => {
 
   useEffect(() => {
     if (!websocket) {
-      console.log("this ran...");
       setWs(new WebSocket(SecureIrcUrl));
     }
   }, [websocket, setWs]);
@@ -65,15 +65,6 @@ export const useIRCWebsocket = () => {
   useEffect(() => {
     setListeners();
   }, [setListeners]);
-
-  useEffect(() => {
-    return function () {
-      if (websocket) {
-        console.log("CLOSING");
-        websocket.close();
-      }
-    };
-  }, [websocket]);
 
   return {
     websocket,

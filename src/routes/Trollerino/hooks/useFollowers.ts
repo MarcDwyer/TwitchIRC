@@ -1,7 +1,7 @@
 import { useRecoilState, useRecoilValue } from "recoil";
 import { helixState } from "../selectors/helixAPI";
 import { followersState } from "../atoms/followers";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 export const useFollowers = () => {
   const helixAPI = useRecoilValue(helixState);
@@ -18,6 +18,12 @@ export const useFollowers = () => {
       console.error(e);
     }
   }, [setFollowers, helixAPI]);
+
+  useEffect(() => {
+    if (helixAPI && !followers) {
+      getFollowers();
+    }
+  }, [getFollowers]);
 
   return {
     getFollowers,

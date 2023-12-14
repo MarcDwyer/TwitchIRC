@@ -1,22 +1,20 @@
-import { deferred } from "@src/utils/async/deferred";
 import { useCallback, useState } from "react";
 
-export const useModal = <T>() => {
-  const [signal, setSignal] = useState(deferred<T>());
+export const useModal = () => {
   const [open, setOpen] = useState<boolean>(false);
 
   const openModal = useCallback(() => {
     setOpen(true);
-    signal.finally(() => {
-      setOpen(false);
-      setSignal(deferred());
-    });
-    return signal;
-  }, [signal, setOpen]);
+  }, [setOpen]);
+
+  const closeModal = useCallback(() => {
+    console.log("this ran..");
+    setOpen(false);
+  }, [setOpen]);
 
   return {
-    signal,
     open,
     openModal,
+    closeModal,
   };
 };
