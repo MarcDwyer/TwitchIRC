@@ -8,6 +8,8 @@ import { useFollowers } from "./useFollowers";
 import { createIRCMessage } from "../utils/createIrcMessage";
 import { credentialsState } from "../atoms/credentials";
 import { createChannelName } from "../utils/createChannelName";
+import { isMentioned } from "../utils/isMentioned";
+import { TwitchCmds } from "../utils/twitchCmds";
 
 const MAX_MSG_LEN = 350;
 
@@ -40,7 +42,7 @@ export const useJoined = () => {
       if (!ws) {
         return;
       }
-      ws.send(`PART ${channelName}`);
+      ws.send(TwitchCmds.part(channelName));
       const updatedJoined = new Map(joined);
       updatedJoined.delete(channelName);
       setJoined(updatedJoined);
@@ -56,12 +58,17 @@ export const useJoined = () => {
         if (msgs.length >= MAX_MSG_LEN) {
           msgs = msgs.slice(1, msgs.length);
         }
+        const mentioned = isMentioned(creds?.loginName as string, msg.message);
         setJoined(
-          new Map(joined).set(msg.channel, { ...channel, messages: msgs })
+          new Map(joined).set(msg.channel, {
+            ...channel,
+            messages: msgs,
+            mentioned,
+          })
         );
       }
     },
-    [joined, setJoined]
+    [joined, setJoined, creds]
   );
   const setPaused = useCallback(
     (paused: boolean, channelName: string) => {
@@ -80,13 +87,14 @@ export const useJoined = () => {
       for (const stream of streams) {
         const channelName = createChannelName(stream.user_login);
 
-        if (!newJoined.has(channelName)) {
+        if (!newJoined.has(channelName) && ws) {
+          ws.send(TwitchCmds.join(channelName));
           newJoined.set(channelName, createJoinedAtomVal(channelName, stream));
         }
       }
       return newJoined;
     },
-    [joined]
+    [joined, ws]
   );
 
   const broadcast = useCallback(
@@ -102,13 +110,28 @@ export const useJoined = () => {
           channelName,
         });
         joinedChan.messages.push(ircMsg);
-        ws.send(`PRIVMSG ${channelName} :${message}`);
+
+        ws.send(TwitchCmds.send(channelName, message));
       }
       setJoined(updatedJoined);
     },
-    [bulkJoin, creds, ws]
+    [bulkJoin, creds, ws, followers]
   );
+
+  const resetMentioned = useCallback(
+    (channelName: string) => {
+      const updatedJoined = new Map(joined);
+      const channel = updatedJoined.get(channelName);
+      if (channel) {
+        updatedJoined.set(channelName, { ...channel, mentioned: false });
+        setJoined(updatedJoined);
+      }
+    },
+    [joined]
+  );
+
   return {
+    resetMentioned,
     setPaused,
     join,
     part,

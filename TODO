@@ -2,9 +2,6 @@
 ✔ Pause chat when scrolling @done(23-12-13 22:35)
 
 Ideas
-# broadcast to all
-# scroll horizontally on joined tabs
 # add include notification
-# add @{username} with autocomplete (maybe use a tri data structure)
-# add functions to send custom twitch messages (ircAction)
 # finish mentioned
+# add @{username} with autocomplete (maybe use a tri data structure)
