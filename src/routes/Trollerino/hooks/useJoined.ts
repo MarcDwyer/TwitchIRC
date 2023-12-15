@@ -5,9 +5,9 @@ import { useCallback } from "react";
 import { IrcMessage } from "@src/twitchChat/twitch_data";
 import { ircSocketState } from "../atoms/ircSocket";
 import { useFollowers } from "./useFollowers";
-import { createChannelName } from "../utils/createChannelname";
 import { createIRCMessage } from "../utils/createIrcMessage";
 import { credentialsState } from "../atoms/credentials";
+import { createChannelName } from "../utils/createChannelName";
 
 const MAX_MSG_LEN = 350;
 

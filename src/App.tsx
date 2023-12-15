@@ -23,7 +23,7 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <div className="w-full h-screen flex overflow-hidden">
+    <div className="w-full h-screen flex">
       <RecoilRoot>
         <ToastContainer />
         <RouterProvider router={router} />
