@@ -7,6 +7,9 @@ import { createChannelName } from "../utils/createChannelName";
 import { bulkJoin } from "../utils/bulkJoin";
 import { createIRCMessage } from "../utils/createIrcMessage";
 import { useWebSocketStore } from "./websocket";
+import { useFollowersStore } from "./followers";
+import { isMentioned } from "../utils/isMentioned";
+import { useCrendentialsStore } from "./credentials";
 
 export type JoinedMap = Map<string, JoinedAtomValue>;
 
@@ -19,7 +22,7 @@ type JoinedStoreState = {
   part: (channelName: string) => void;
   join: (twitchStream: TwitchStream) => void;
   setPaused: (channelName: string, paused: boolean) => void;
-  broadcast: (streams: TwitchStream[], message: string) => void;
+  broadcast: (message: string) => void;
   resetMentioned: (channelName: string) => void;
 };
 
@@ -47,10 +50,16 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
       const updatedJoined = new Map(state.joined);
       const channel = updatedJoined.get(ircMsg.channel);
       if (!channel) return state;
+      let mentioned = channel.mentioned;
+      const login = useCrendentialsStore.getState().info?.login;
+      if (login) {
+        mentioned = isMentioned(login, ircMsg.message);
+      }
       return {
         joined: updatedJoined.set(ircMsg.channel, {
           ...channel,
           messages: [...channel.messages, ircMsg],
+          mentioned,
         }),
       };
     }),
@@ -91,13 +100,15 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
       }
       return state;
     }),
-  broadcast: (streams, message) =>
+  broadcast: (message) =>
     set((state) => {
       const ws = useWebSocketStore.getState().ws;
 
       if (!ws || !state.userLogin) return state;
 
-      const updatedJoined = bulkJoin(streams, state.joined);
+      const followers = useFollowersStore.getState().followers ?? [];
+
+      const updatedJoined = bulkJoin(followers, state.joined);
 
       for (const joined of updatedJoined.values()) {
         const ircMsg = createIRCMessage({

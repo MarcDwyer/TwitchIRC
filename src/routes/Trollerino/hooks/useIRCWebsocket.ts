@@ -1,35 +1,31 @@
-import { useRecoilState } from "recoil";
 import { useCallback, useEffect } from "react";
 import { msgParcer } from "@src/twitchChat/parser";
-import { useJoined } from "./useJoined";
 import { SecureIrcUrl } from "@src/twitchChat/twitch_data";
-import { ircSocketState } from "../atoms/ircSocket";
 import { TwitchCredentials } from "..";
 import { useCrendentialsStore } from "../stores/credentials";
 import { useJoinedStore } from "../stores/joined";
+import { useWebSocketStore } from "../stores/websocket";
 
 export type TwitchConnect = (creds: TwitchCredentials) => Promise<WebSocket>;
 
 export const useIRCWebsocket = () => {
-  const { addMsg } = useJoined();
-  const [websocket, setWs] = useRecoilState(ircSocketState);
-  // const creds = useRecoilValue(credentialsState);
+  const { ws, setWs } = useWebSocketStore();
   const info = useCrendentialsStore((store) => store.info);
   const addMessage = useJoinedStore((store) => store.addMessage);
 
   const setListeners = useCallback(() => {
-    if (!websocket || !info) {
+    if (!ws || !info) {
       return;
     }
-    websocket.onopen = () => {
-      websocket.send(
+    ws.onopen = () => {
+      ws.send(
         "CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands"
       );
-      websocket.send(`PASS oauth:${info.token}`);
-      websocket.send(`NICK ${info.login}`);
+      ws.send(`PASS oauth:${info.token}`);
+      ws.send(`NICK ${info.login}`);
     };
 
-    websocket.onmessage = (msg) => {
+    ws.onmessage = (msg) => {
       const parsedMsg = msgParcer(msg.data, info.login);
       if (!parsedMsg) {
         return;
@@ -37,40 +33,39 @@ export const useIRCWebsocket = () => {
       switch (parsedMsg.command) {
         case "001":
           //successfully authenticated & connected
-          websocket.send(
+          ws.send(
             "CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership"
           );
           break;
         case "PING":
-          websocket.send("PONG :tmi.twitch.tv");
+          ws.send("PONG :tmi.twitch.tv");
           break;
         case "PRIVMSG":
-          addMsg(parsedMsg);
           addMessage(parsedMsg);
           break;
         case "NOTICE":
           if (parsedMsg.raw.includes("failed")) {
-            console.log("Websocket failed... closing");
-            websocket.close();
+            console.log("ws failed... closing");
+            ws.close();
             setWs(null);
             console.error(parsedMsg.raw);
           }
           break;
       }
     };
-  }, [websocket, info, addMsg]);
+  }, [ws, info, addMessage]);
 
   useEffect(() => {
-    if (!websocket) {
+    if (!ws) {
       setWs(new WebSocket(SecureIrcUrl));
     }
-  }, [websocket, setWs]);
+  }, [ws, setWs]);
 
   useEffect(() => {
     setListeners();
   }, [setListeners]);
 
   return {
-    websocket,
+    ws,
   };
 };

@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 export type WebSocketStoreState = {
   ws: WebSocket | null;
-  setWs: (ws: WebSocket) => void;
+  setWs: (ws: WebSocket | null) => void;
 };
 
 export const useWebSocketStore = create<WebSocketStoreState>((set) => ({

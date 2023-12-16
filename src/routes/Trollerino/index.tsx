@@ -1,9 +1,8 @@
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { Followers } from "./components/Followers/index";
 import { IRCView } from "./components/IRCView";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useIRCWebsocket } from "./hooks/useIRCWebsocket";
-import { useWebSocketStore } from "./stores/websocket";
 import { useCrendentialsStore } from "./stores/credentials";
 
 export type TwitchCredentials = {
@@ -12,13 +11,12 @@ export type TwitchCredentials = {
 };
 
 export default function Trollerino() {
-  const setWs = useWebSocketStore((store) => store.setWs);
   const setInfo = useCrendentialsStore((store) => store.setInfo);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const { websocket } = useIRCWebsocket();
+  useIRCWebsocket();
 
   useEffect(() => {
     const accessToken = searchParams.get("access_token");
@@ -33,12 +31,6 @@ export default function Trollerino() {
       navigate("/");
     }
   }, [searchParams, setInfo]);
-
-  useEffect(() => {
-    if (websocket) {
-      setWs(websocket);
-    }
-  }, [websocket, setWs]);
 
   return (
     <div className="h-full w-full flex">
