@@ -1,30 +1,47 @@
 import { BroadcastAll } from "./BroadcastAll";
 import { Follower } from "./Follower";
-import { useJoined } from "../../hooks/useJoined";
-import { useActiveChannel } from "../../hooks/useActiveChannel";
-import { useFollowers } from "../../hooks/useFollowers";
+import { useFollowersStore } from "../../stores/followers";
+import { useEffect } from "react";
+import { useCrendentialsStore } from "../../stores/credentials";
+import { useJoinedStore } from "../../stores/joined";
+import { useActiveChannelStore } from "../../stores/activeChannel";
+import { createChannelName } from "../../utils/createChannelName";
 
 export const Followers = () => {
-  const { join } = useJoined();
-  const { setActiveChannel } = useActiveChannel();
-  const { followers } = useFollowers();
+  const join = useJoinedStore((store) => store.join);
+  const { followers, getFollowers } = useFollowersStore((store) => store);
+  const info = useCrendentialsStore((store) => store.info);
+  const setActiveChannel = useActiveChannelStore(
+    (store) => store.setActiveChannel
+  );
+
+  useEffect(() => {
+    if (info && !followers) {
+      getFollowers();
+    }
+  }, [followers, getFollowers, info]);
 
   return (
     <div className="flex flex-col bg-gray-800 w-48 flex-none">
-      <BroadcastAll />
-      {followers &&
-        followers.map((stream) => (
-          <Follower
-            handleClick={() => {
-              const joined = join(stream);
-              if (joined) {
-                setActiveChannel(joined.channelName);
-              }
-            }}
-            key={stream.user_id}
-            follower={stream}
-          />
-        ))}
+      {followers ? (
+        <>
+          <BroadcastAll />
+          {followers.map((stream) => (
+            <Follower
+              handleClick={() => {
+                // shit
+                const channelName = createChannelName(stream.user_login);
+                join(stream);
+                setActiveChannel(channelName);
+              }}
+              key={stream.user_id}
+              follower={stream}
+            />
+          ))}
+        </>
+      ) : (
+        <span>Loading followers...</span>
+      )}
     </div>
   );
 };

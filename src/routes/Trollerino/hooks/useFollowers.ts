@@ -19,11 +19,11 @@ export const useFollowers = () => {
     }
   }, [setFollowers, helixAPI]);
 
-  useEffect(() => {
-    if (helixAPI && !followers) {
-      getFollowers();
-    }
-  }, [getFollowers]);
+  // useEffect(() => {
+  //   if (helixAPI && !followers) {
+  //     getFollowers();
+  //   }
+  // }, [getFollowers]);
 
   return {
     getFollowers,

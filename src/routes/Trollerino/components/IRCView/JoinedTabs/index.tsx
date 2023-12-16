@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { useJoined } from "../../../hooks/useJoined";
 import { JoinedTab } from "./JoinedTab";
+import { useJoinedStore } from "@src/routes/Trollerino/stores/joined";
 
 export const JoinedTabs = () => {
-  const { joined } = useJoined();
+  const joined = useJoinedStore((store) => store.joined);
   const streams = useMemo(() => Array.from(joined.values()), [joined]);
 
   return (

@@ -1,28 +1,36 @@
 import { JoinedAtomValue } from "@src/routes/Trollerino/atoms/joined";
-import { useActiveChannel } from "@src/routes/Trollerino/hooks/useActiveChannel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
-import { useJoined } from "@src/routes/Trollerino/hooks/useJoined";
 import { useEffect } from "react";
+import { useJoinedStore } from "@src/routes/Trollerino/stores/joined";
+import { useShallow } from "zustand/react/shallow";
+import { useActiveChannelStore } from "@src/routes/Trollerino/stores/activeChannel";
 
 type Props = {
   stream: JoinedAtomValue;
 };
 
 export function JoinedTab({ stream }: Props) {
-  const { activeChannel, setActiveChannel } = useActiveChannel();
-  const { part, resetMentioned } = useJoined();
+  const activeChannel = useActiveChannelStore();
+
+  const { part, resetMentioned } = useJoinedStore(
+    useShallow((store) => ({
+      part: store.part,
+      resetMentioned: store.resetMentioned,
+    }))
+  );
 
   useEffect(() => {
     if (activeChannel?.channelName === stream.channelName && stream.mentioned) {
       resetMentioned(stream.channelName);
     }
   }, [activeChannel, stream, resetMentioned]);
+
   return (
     <div
       onClick={() => {
         // set active channel
-        setActiveChannel(stream.channelName);
+        activeChannel.setActiveChannel(stream.channelName);
       }}
       className={`border flex-none w-32 border-slate-800 cursor-pointer relative flex ${
         activeChannel && stream.channelName === activeChannel?.channelName

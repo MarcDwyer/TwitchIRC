@@ -1,19 +1,26 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useJoined } from "./useJoined";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { activeChannelNameState } from "../atoms/activeChannelName";
 import { createIRCMessage } from "../utils/createIrcMessage";
-import { credentialsState } from "../atoms/credentials";
-import { ircSocketState } from "../atoms/ircSocket";
+import { useActiveChannelStore } from "../stores/activeChannel";
+import { useWebSocketStore } from "../stores/websocket";
+import { useCrendentialsStore } from "../stores/credentials";
+import { useShallow } from "zustand/react/shallow";
+import { useJoinedStore } from "../stores/joined";
 
 export const useActiveChannel = () => {
-  const [activeChannelName, _setActiveChannelName] = useRecoilState(
-    activeChannelNameState
+  const [activeChannelName, setActiveChannel] = useActiveChannelStore(
+    (store) => [store.channelName, store.setActiveChannel]
   );
-  const ws = useRecoilValue(ircSocketState);
-  const creds = useRecoilValue(credentialsState);
+  const ws = useWebSocketStore((store) => store.ws);
+  const creds = useCrendentialsStore((store) => store.info);
 
-  const { joined, addMsg, setPaused } = useJoined();
+  const { joined, addMsg, setPaused } = useJoinedStore(
+    useShallow((store) => ({
+      joined: store.joined,
+      addMsg: store.addMessage,
+      setPaused: store.setPaused,
+    }))
+  );
 
   const activeChannel = useMemo(() => {
     if (!activeChannelName) {
@@ -22,10 +29,11 @@ export const useActiveChannel = () => {
     return joined.get(activeChannelName);
   }, [activeChannelName, joined]);
 
+  console.log({ activeChannel });
   useEffect(() => {
     if (!activeChannel && joined.size) {
       const { channelName } = Array.from(joined.values())[0];
-      _setActiveChannelName(channelName);
+      setActiveChannel(channelName);
     }
   }, [activeChannel, joined]);
 
@@ -35,7 +43,7 @@ export const useActiveChannel = () => {
         ws.send(`PRIVMSG ${activeChannel?.channelName} :${msg}`);
         // Need to manually add own user message. Not sure how to do this via IRC events
         const ircMsg = createIRCMessage({
-          username: creds.loginName,
+          username: creds.login,
           message: msg,
           channelName: activeChannel?.channelName,
         });
@@ -53,18 +61,15 @@ export const useActiveChannel = () => {
     return link;
   }, [activeChannel]);
 
-  const setActiveChannel = (channelName: string) =>
-    _setActiveChannelName(channelName);
-
   const pause = useCallback(() => {
     if (activeChannelName) {
-      setPaused(true, activeChannelName);
+      setPaused(activeChannelName, true);
     }
   }, [activeChannelName, setPaused]);
 
   const unpause = useCallback(() => {
     if (activeChannelName) {
-      setPaused(false, activeChannelName);
+      setPaused(activeChannelName, false);
     }
   }, [activeChannelName, setPaused]);
 
