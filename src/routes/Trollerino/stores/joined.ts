@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { JoinedAtomValue, createJoinedAtomVal } from "../atoms/joined";
 import { IrcMessage } from "@src/twitchChat/twitch_data";
 import { TwitchCmds } from "../utils/twitchCmds";
 import { TwitchStream } from "@src/helix/types/liveFollowers";
@@ -11,13 +10,30 @@ import { useFollowersStore } from "./followers";
 import { isMentioned } from "../utils/isMentioned";
 import { useCrendentialsStore } from "./credentials";
 
-export type JoinedMap = Map<string, JoinedAtomValue>;
+export type JoinedMap = Map<string, JoinedValue>;
+
+export type JoinedValue = {
+  channelName: string;
+  streamData: TwitchStream;
+  mentioned: boolean;
+  messages: IrcMessage[];
+  paused: boolean;
+};
+
+export const createJoinedAtomVal = (
+  channelName: string,
+  stream: TwitchStream
+): JoinedValue => ({
+  channelName,
+  streamData: stream,
+  mentioned: false,
+  messages: [],
+  paused: false,
+});
 
 type JoinedStoreState = {
-  joined: Map<string, JoinedAtomValue>;
-  userLogin: string | null;
+  joined: Map<string, JoinedValue>;
   updateJoined: (updatedJoined: JoinedMap) => void;
-  setUserLogin: (userLogin: string) => void;
   addMessage: (ircMsg: IrcMessage) => void;
   part: (channelName: string) => void;
   join: (twitchStream: TwitchStream) => void;
@@ -28,8 +44,6 @@ type JoinedStoreState = {
 
 export const useJoinedStore = create<JoinedStoreState>((set) => ({
   joined: new Map(),
-  userLogin: null,
-  setUserLogin: (userLogin) => set(() => ({ userLogin })),
   updateJoined: (updatedJoined) => set(() => ({ joined: updatedJoined })),
   resetMentioned: (channelName) =>
     set((state) => {
@@ -103,16 +117,19 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
   broadcast: (message) =>
     set((state) => {
       const ws = useWebSocketStore.getState().ws;
-
-      if (!ws || !state.userLogin) return state;
+      const userLogin = useCrendentialsStore.getState().info?.login;
+      if (!ws || !userLogin) return state;
 
       const followers = useFollowersStore.getState().followers ?? [];
 
-      const updatedJoined = bulkJoin(followers, state.joined);
+      const [updatedJoined, notJoined] = bulkJoin(followers, state.joined);
 
       for (const joined of updatedJoined.values()) {
+        if (notJoined.has(joined.channelName)) {
+          ws.send(TwitchCmds.join(joined.channelName));
+        }
         const ircMsg = createIRCMessage({
-          username: state.userLogin,
+          username: userLogin,
           channelName: joined.channelName,
           message,
         });

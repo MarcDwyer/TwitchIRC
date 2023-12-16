@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useJoined } from "./useJoined";
 import { createIRCMessage } from "../utils/createIrcMessage";
 import { useActiveChannelStore } from "../stores/activeChannel";
 import { useWebSocketStore } from "../stores/websocket";
@@ -29,7 +28,6 @@ export const useActiveChannel = () => {
     return joined.get(activeChannelName);
   }, [activeChannelName, joined]);
 
-  console.log({ activeChannel });
   useEffect(() => {
     if (!activeChannel && joined.size) {
       const { channelName } = Array.from(joined.values())[0];
