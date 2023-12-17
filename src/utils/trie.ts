@@ -30,9 +30,9 @@ export class Trie {
       lastWord += char;
       lastNode = lastNode.children[char];
     }
-    return this.getRecommendations(lastNode, [], 0, lastWord, true);
+    return this.getSuggestions(lastNode, [], 0, lastWord, true);
   }
-  getRecommendations(
+  getSuggestions(
     node: Node,
     list: string[],
     limit: number,
@@ -48,11 +48,8 @@ export class Trie {
     if (limit >= depthLimit) return list;
     limit++;
     for (const childNode of Object.values(node.children)) {
-      this.getRecommendations(childNode, list, limit, word, false);
+      this.getSuggestions(childNode, list, limit, word, false);
     }
     return list;
   }
 }
-// "ro"
-
-// -> r -> o
