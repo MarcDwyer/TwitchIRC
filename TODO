@@ -2,6 +2,4 @@
 ✔ Pause chat when scrolling @done(23-12-13 22:35)
 
 Ideas
-# add include notification
-# finish mentioned
 # add @{username} with autocomplete (maybe use a tri data structure)

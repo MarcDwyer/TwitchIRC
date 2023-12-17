@@ -7,7 +7,7 @@ export function bulkJoin(
   joined: JoinedMap
 ): [JoinedMap, Set<string>] {
   const newJoined = new Map(joined);
-  const notJoined = new Set();
+  const notJoined = new Set<string>();
   for (const stream of streams) {
     const channelName = createChannelName(stream.user_login);
 
