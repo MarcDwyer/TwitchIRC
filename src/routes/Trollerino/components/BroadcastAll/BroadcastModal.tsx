@@ -2,19 +2,18 @@ import { Modal, Button } from "flowbite-react";
 import { useState } from "react";
 
 type Props = {
-  open: boolean;
   onSubmit: (message: string) => void;
   closeModal: () => void;
 };
 
-export const BroadcastModal = ({ closeModal, open, onSubmit }: Props) => {
+export const BroadcastModal = ({ closeModal, onSubmit }: Props) => {
   const [message, setMessage] = useState("");
 
   return (
     <Modal
       onClose={closeModal}
       position="center"
-      show={open}
+      show={true}
       className="text-white"
     >
       <Modal.Header as={"span"} className="bg-gray-700">
@@ -29,6 +28,7 @@ export const BroadcastModal = ({ closeModal, open, onSubmit }: Props) => {
           }}
         >
           <input
+            autoFocus
             className="p-2 mb-3 w-full"
             value={message}
             onChange={(e) => setMessage(e.target.value)}

@@ -8,7 +8,6 @@ export const useModal = () => {
   }, [setOpen]);
 
   const closeModal = useCallback(() => {
-    console.log("this ran..");
     setOpen(false);
   }, [setOpen]);
 

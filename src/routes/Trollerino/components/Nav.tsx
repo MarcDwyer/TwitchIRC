@@ -1,6 +1,6 @@
-import { BroadcastAll } from "../BroadcastAll";
-import { ConnectAgain } from "../ConnectAgain";
-import { Followers } from "../Followers";
+import { BroadcastAll } from "./BroadcastAll";
+import { ConnectAgain } from "./ConnectAgain";
+import { Followers } from "./Followers";
 
 export function Nav() {
   return (

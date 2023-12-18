@@ -10,13 +10,14 @@ export const BroadcastAll = () => {
       <div onClick={openModal} className="m-auto">
         Broadcast to All
       </div>
-      <BroadcastModal
-        open={open}
-        closeModal={closeModal}
-        onSubmit={(message) => {
-          broadcast(message);
-        }}
-      />
+      {open && (
+        <BroadcastModal
+          closeModal={closeModal}
+          onSubmit={(message) => {
+            broadcast(message);
+          }}
+        />
+      )}
     </div>
   );
 };

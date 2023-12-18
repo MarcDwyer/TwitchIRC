@@ -30,8 +30,7 @@ export default function Trollerino() {
       };
       setInfo(creds);
       getFollowers(creds);
-      const websocket = new WebSocket(SecureIrcUrl);
-      setWs(websocket);
+      setWs(creds);
     } else {
       navigate("/");
     }

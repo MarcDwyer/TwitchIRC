@@ -1,22 +1,20 @@
 import { create } from "zustand";
-import { useCrendentialsStore } from "./credentials";
+import { Credentials, useCrendentialsStore } from "./credentials";
 import { msgParcer } from "@src/twitchChat/parser";
 import { useJoinedStore } from "./joined";
+import { SecureIrcUrl } from "@src/twitchChat/twitch_data";
 
 export type WebSocketStoreState = {
   ws: WebSocket | null;
   connected: boolean;
-  setWs: (ws: WebSocket | null) => void;
+  setWs: (info: Credentials) => void;
 };
 
 export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
   ws: null,
   connected: false,
-  setWs: (ws) => {
-    const info = useCrendentialsStore.getState().info;
-    if (!ws || !info) {
-      return;
-    }
+  setWs: (info) => {
+    const ws = new WebSocket(SecureIrcUrl);
     ws.onopen = () => {
       ws.send(
         "CAP REQ :twitch.tv/membership twitch.tv/tags twitch.tv/commands"
@@ -43,7 +41,6 @@ export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
           break;
         case "PRIVMSG":
           const addMessage = useJoinedStore.getState().addMessage;
-          console.log({ addMessage, parsedMsg });
           addMessage(parsedMsg);
           break;
         case "NOTICE":
