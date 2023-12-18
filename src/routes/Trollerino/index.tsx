@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { IRCView } from "./components/IRCView";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useCrendentialsStore } from "./stores/credentials";
+import { Credentials, useCrendentialsStore } from "./stores/credentials";
 import { useWebSocketStore } from "./stores/websocket";
 import { SecureIrcUrl } from "@src/twitchChat/twitch_data";
 import { Nav } from "./components/Nav";
+import { useFollowersStore } from "./stores/followers";
 
 export type TwitchCredentials = {
   loginName: string;
@@ -14,6 +15,7 @@ export type TwitchCredentials = {
 export default function Trollerino() {
   const setInfo = useCrendentialsStore((store) => store.setInfo);
   const setWs = useWebSocketStore((store) => store.setWs);
+  const getFollowers = useFollowersStore((store) => store.getFollowers);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -22,16 +24,18 @@ export default function Trollerino() {
     const loginName = searchParams.get("loginName");
 
     if (accessToken && loginName) {
-      setInfo({
+      const creds: Credentials = {
         login: loginName,
         token: accessToken,
-      });
+      };
+      setInfo(creds);
+      getFollowers(creds);
       const websocket = new WebSocket(SecureIrcUrl);
       setWs(websocket);
     } else {
       navigate("/");
     }
-  }, [searchParams, setInfo, setWs]);
+  }, [searchParams, setInfo, setWs, getFollowers]);
 
   return (
     <div className="h-full w-full flex">

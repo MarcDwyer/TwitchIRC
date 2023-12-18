@@ -1,23 +1,21 @@
 import { HelixAPI } from "@src/helix";
 import { TwitchStream } from "@src/helix/types/liveFollowers";
 import { create } from "zustand";
-import { useCrendentialsStore } from "./credentials";
 import { CLIENTID } from "@src/utils/oauth";
+import { Credentials } from "./credentials";
 
 export type FollowersStoreState = {
   followers: null | TwitchStream[];
-  getFollowers: () => Promise<void>;
+  getFollowers: (creds: Credentials) => Promise<void>;
 };
 
 export const useFollowersStore = create<FollowersStoreState>((set) => ({
   followers: null,
-  getFollowers: async () => {
+  getFollowers: async (creds) => {
     try {
-      const info = useCrendentialsStore.getState().info;
-      if (!info) throw new Error("Info not set");
       const helixAPI = new HelixAPI({
-        loginName: info.login,
-        token: info.token,
+        loginName: creds.login,
+        token: creds.token,
         clientId: CLIENTID,
       });
       const [followersResp] = await helixAPI.getLiveFollowers();

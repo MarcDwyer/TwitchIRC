@@ -36,13 +36,14 @@ export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
           ws.send(
             "CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership"
           );
-          set({ connected: true });
+          set({ connected: true, ws });
           break;
         case "PING":
           ws.send("PONG :tmi.twitch.tv");
           break;
         case "PRIVMSG":
           const addMessage = useJoinedStore.getState().addMessage;
+          console.log({ addMessage, parsedMsg });
           addMessage(parsedMsg);
           break;
         case "NOTICE":

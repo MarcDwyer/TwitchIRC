@@ -1,25 +1,15 @@
 import { Follower } from "./Follower";
 import { useFollowersStore } from "../../stores/followers";
-import { useEffect } from "react";
-import { useCrendentialsStore } from "../../stores/credentials";
 import { useJoinedStore } from "../../stores/joined";
 import { useActiveChannelStore } from "../../stores/activeChannel";
 import { createChannelName } from "../../utils/createChannelName";
 
 export const Followers = () => {
   const join = useJoinedStore((store) => store.join);
-  const { followers, getFollowers } = useFollowersStore((store) => store);
-  const info = useCrendentialsStore((store) => store.info);
+  const followers = useFollowersStore((store) => store.followers);
   const setActiveChannel = useActiveChannelStore(
     (store) => store.setActiveChannel
   );
-
-  useEffect(() => {
-    if (info && !followers) {
-      getFollowers();
-    }
-  }, [followers, getFollowers, info]);
-
   return (
     <>
       {followers ? (
