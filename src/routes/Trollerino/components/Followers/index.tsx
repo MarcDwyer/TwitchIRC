@@ -1,4 +1,3 @@
-import { BroadcastAll } from "./BroadcastAll";
 import { Follower } from "./Follower";
 import { useFollowersStore } from "../../stores/followers";
 import { useEffect } from "react";
@@ -22,10 +21,9 @@ export const Followers = () => {
   }, [followers, getFollowers, info]);
 
   return (
-    <div className="flex flex-col bg-gray-800 w-48 flex-none">
+    <>
       {followers ? (
         <>
-          <BroadcastAll />
           {followers.map((stream) => (
             <Follower
               handleClick={() => {
@@ -42,6 +40,6 @@ export const Followers = () => {
       ) : (
         <span>Loading followers...</span>
       )}
-    </div>
+    </>
   );
 };

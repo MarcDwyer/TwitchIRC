@@ -6,6 +6,7 @@ import { TwitchLink } from "@src/components/TwitchLink";
 export const ChatBox = () => {
   const { activeChannel, send, linkToStream, pause, unpause } =
     useActiveChannel();
+
   return (
     <>
       {activeChannel && (
@@ -16,6 +17,7 @@ export const ChatBox = () => {
                 classNames="m-auto"
                 href={linkToStream}
                 text={`Watch ${activeChannel.streamData.user_name}`}
+                newTab={true}
               />
             )}
           </div>

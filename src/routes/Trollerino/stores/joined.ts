@@ -18,6 +18,7 @@ export type JoinedValue = {
   mentioned: boolean;
   messages: IrcMessage[];
   paused: boolean;
+  chatters: Set<string>;
 };
 
 export const createJoinedAtomVal = (
@@ -29,6 +30,7 @@ export const createJoinedAtomVal = (
   mentioned: false,
   messages: [],
   paused: false,
+  chatters: new Set(),
 });
 
 type JoinedStoreState = {
@@ -68,6 +70,9 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
       const login = useCrendentialsStore.getState().info?.login;
       if (login) {
         mentioned = isMentioned(login, ircMsg.message);
+      }
+      if (!channel.chatters.has(ircMsg.channel)) {
+        channel.chatters = new Set(channel.chatters).add(ircMsg.channel);
       }
       return {
         joined: updatedJoined.set(ircMsg.channel, {
