@@ -22,7 +22,7 @@ export type JoinedValue = {
   chatters: Set<string>;
 };
 
-export const createJoinedAtomVal = (
+export const createJoinedValue = (
   channelName: string,
   stream: TwitchStream
 ): JoinedValue => ({
@@ -100,7 +100,7 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
         useActiveChannelStore.getState().setActiveChannel;
       const updatedJoined = new Map(state.joined);
       const channelName = createChannelName(stream.user_login);
-      const joinedChannel = createJoinedAtomVal(channelName, stream);
+      const joinedChannel = createJoinedValue(channelName, stream);
       updatedJoined.set(channelName, joinedChannel);
       const ws = useWebSocketStore.getState().ws;
       if (ws) {

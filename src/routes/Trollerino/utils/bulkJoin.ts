@@ -1,5 +1,5 @@
 import { TwitchStream } from "@src/helix/types/liveFollowers";
-import { JoinedMap, createJoinedAtomVal } from "../stores/joined";
+import { JoinedMap, createJoinedValue } from "../stores/joined";
 import { createChannelName } from "./createChannelName";
 
 export function bulkJoin(
@@ -12,7 +12,7 @@ export function bulkJoin(
     const channelName = createChannelName(stream.user_login);
 
     if (!newJoined.has(channelName)) {
-      newJoined.set(channelName, createJoinedAtomVal(channelName, stream));
+      newJoined.set(channelName, createJoinedValue(channelName, stream));
       notJoined.add(channelName);
     }
   }

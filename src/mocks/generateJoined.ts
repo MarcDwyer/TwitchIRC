@@ -1,6 +1,6 @@
 import {
   JoinedAtomValue,
-  createJoinedAtomVal,
+  createJoinedValue,
 } from "@src/routes/Trollerino/atoms/joined";
 
 const twitchStream = {
@@ -25,7 +25,7 @@ export function generateJoined(len: number) {
   const joinedAtoms: JoinedAtomValue[] = [];
   for (let i = 0; i < len; i++) {
     const channelName = `test${i}`;
-    const joined = createJoinedAtomVal(channelName, twitchStream);
+    const joined = createJoinedValue(channelName, twitchStream);
     joinedAtoms.push(joined);
   }
   return joinedAtoms;
