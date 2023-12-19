@@ -7,8 +7,9 @@ import { bulkJoin } from "../utils/bulkJoin";
 import { createIRCMessage } from "../utils/createIrcMessage";
 import { useWebSocketStore } from "./websocket";
 import { useFollowersStore } from "./followers";
-import { isMentioned } from "../utils/isMentioned";
 import { useCrendentialsStore } from "./credentials";
+import { useActiveChannelStore } from "./activeChannel";
+import { useMessagesStore } from "./messages";
 
 export type JoinedMap = Map<string, JoinedValue>;
 
@@ -36,12 +37,12 @@ export const createJoinedAtomVal = (
 type JoinedStoreState = {
   joined: Map<string, JoinedValue>;
   updateJoined: (updatedJoined: JoinedMap) => void;
-  addMessage: (ircMsg: IrcMessage) => void;
   part: (channelName: string) => void;
   join: (twitchStream: TwitchStream) => void;
   setPaused: (channelName: string, paused: boolean) => void;
   broadcast: (message: string) => void;
   resetMentioned: (channelName: string) => void;
+  setMentioned: (channelName: string, mentioned: boolean) => void;
 };
 
 export const useJoinedStore = create<JoinedStoreState>((set) => ({
@@ -52,43 +53,42 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
       const updatedJoined = new Map(state.joined);
       const channel = updatedJoined.get(channelName);
       if (channel) {
+        const updatedChannel = {
+          ...channel,
+          mentioned: false,
+        };
         return {
-          joined: updatedJoined.set(channelName, {
-            ...channel,
-            mentioned: false,
-          }),
+          joined: updatedJoined.set(channelName, updatedChannel),
         };
       }
       return state;
     }),
-  addMessage: (ircMsg) =>
+  setMentioned: (channelName, mentioned) =>
     set((state) => {
-      const updatedJoined = new Map(state.joined);
-      const channel = updatedJoined.get(ircMsg.channel);
+      const channel = state.joined.get(channelName);
       if (!channel) return state;
-      let mentioned = channel.mentioned;
-      const login = useCrendentialsStore.getState().info?.login;
-      if (login) {
-        mentioned = isMentioned(login, ircMsg.message);
-      }
-      if (!channel.chatters.has(ircMsg.channel)) {
-        channel.chatters = new Set(channel.chatters).add(ircMsg.channel);
-      }
+      const updatedChannel = {
+        ...channel,
+        mentioned,
+      };
+
       return {
-        joined: updatedJoined.set(ircMsg.channel, {
-          ...channel,
-          messages: [...channel.messages, ircMsg],
-          mentioned,
-        }),
+        joined: new Map(state.joined).set(channelName, updatedChannel),
       };
     }),
   part: (channelName) =>
     set((state) => {
+      const { channel: activeChannel, setActiveChannel } =
+        useActiveChannelStore.getState();
+      const isActive = activeChannel?.channelName === channelName;
       const updatedJoined = new Map(state.joined);
       updatedJoined.delete(channelName);
       const ws = useWebSocketStore.getState().ws;
       if (ws) {
         ws.send(TwitchCmds.part(channelName));
+      }
+      if (isActive) {
+        setActiveChannel(null);
       }
       return {
         joined: updatedJoined,
@@ -96,13 +96,17 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
     }),
   join: (stream) =>
     set((state) => {
+      const setActiveChannel =
+        useActiveChannelStore.getState().setActiveChannel;
       const updatedJoined = new Map(state.joined);
       const channelName = createChannelName(stream.user_login);
-      updatedJoined.set(channelName, createJoinedAtomVal(channelName, stream));
+      const joinedChannel = createJoinedAtomVal(channelName, stream);
+      updatedJoined.set(channelName, joinedChannel);
       const ws = useWebSocketStore.getState().ws;
       if (ws) {
         ws.send(TwitchCmds.join(channelName));
       }
+      setActiveChannel(joinedChannel);
       return { joined: updatedJoined };
     }),
   setPaused: (channelName, paused) =>
@@ -125,6 +129,8 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
       const userLogin = useCrendentialsStore.getState().info?.login;
       if (!ws || !userLogin) return state;
 
+      const addMsg = useMessagesStore.getState().addMessage;
+
       const followers = useFollowersStore.getState().followers ?? [];
 
       const [updatedJoined, notJoined] = bulkJoin(followers, state.joined);
@@ -138,10 +144,7 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
           channelName: joined.channelName,
           message,
         });
-        updatedJoined.set(joined.channelName, {
-          ...joined,
-          messages: [...joined.messages, ircMsg],
-        });
+        addMsg(ircMsg);
         ws.send(TwitchCmds.send(joined.channelName, message));
       }
 

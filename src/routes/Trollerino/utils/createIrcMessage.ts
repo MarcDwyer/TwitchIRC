@@ -41,4 +41,3 @@ export const createIRCMessage = ({
   message,
   username,
 });
-// const dummyIrcMessage: IrcMessage = ;

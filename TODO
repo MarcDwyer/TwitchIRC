@@ -3,3 +3,6 @@
 
 Ideas
 # add @{username} with autocomplete (maybe use a tri data structure)
+# refresh followers every x minutes
+
+# split Joined state up. Have a messages store that stores messages of channels, decoupled from joined store

@@ -3,7 +3,6 @@ import { IRCView } from "./components/IRCView";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Credentials, useCrendentialsStore } from "./stores/credentials";
 import { useWebSocketStore } from "./stores/websocket";
-import { SecureIrcUrl } from "@src/twitchChat/twitch_data";
 import { Nav } from "./components/Nav";
 import { useFollowersStore } from "./stores/followers";
 
@@ -13,7 +12,7 @@ export type TwitchCredentials = {
 };
 
 export default function Trollerino() {
-  const setInfo = useCrendentialsStore((store) => store.setInfo);
+  const credentials = useCrendentialsStore();
   const setWs = useWebSocketStore((store) => store.setWs);
   const getFollowers = useFollowersStore((store) => store.getFollowers);
   const [searchParams] = useSearchParams();
@@ -28,13 +27,27 @@ export default function Trollerino() {
         login: loginName,
         token: accessToken,
       };
-      setInfo(creds);
-      getFollowers(creds);
-      setWs(creds);
+      credentials.setInfo(creds);
     } else {
       navigate("/");
     }
-  }, [searchParams, setInfo, setWs, getFollowers]);
+  }, [searchParams, credentials.setInfo, setWs, getFollowers]);
+
+  useEffect(() => {
+    let followerTimer: number | undefined;
+    if (credentials.info) {
+      getFollowers();
+      setWs();
+      if (followerTimer) clearInterval(followerTimer);
+      followerTimer = setInterval(getFollowers, 10 * 60000);
+    }
+    return function () {
+      if (followerTimer) {
+        console.log("Clearing follower timer");
+        clearInterval(followerTimer);
+      }
+    };
+  }, [credentials.info]);
 
   return (
     <div className="h-full w-full flex">

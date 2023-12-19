@@ -1,17 +1,18 @@
 import { JoinedAtomValue } from "@src/routes/Trollerino/atoms/joined";
 import { useEffect } from "react";
 import { useChatPause } from "./hooks/useChatPause";
+import { IrcMessage } from "@src/twitchChat/twitch_data";
 
 type Props = {
   activeChannel: JoinedAtomValue;
+  messages: IrcMessage[];
   pause: () => void;
-  unpause: () => void;
+  resume: () => void;
 };
-// may need to split this up into multiple custom hooks
-export function IRCMessages({ activeChannel, pause, unpause }: Props) {
+export function IRCMessages({ activeChannel, pause, resume, messages }: Props) {
   const { chatEleRef, setChatToBottom } = useChatPause({
     pause,
-    unpause,
+    unpause: resume,
     paused: activeChannel.paused,
   });
 
@@ -20,7 +21,7 @@ export function IRCMessages({ activeChannel, pause, unpause }: Props) {
       setChatToBottom();
     }
   }, [activeChannel.paused, activeChannel.messages]);
-
+  console.log({ messages, activeChannel });
   return (
     <div
       onWheel={pause}
@@ -30,7 +31,7 @@ export function IRCMessages({ activeChannel, pause, unpause }: Props) {
       {activeChannel.paused && (
         <button>Chat has been paused: Click to unpause</button>
       )}
-      {activeChannel.messages.map((message, index) => {
+      {messages.map((message, index) => {
         const color = message.tags.color;
         return (
           <div key={index} className="mb-2">

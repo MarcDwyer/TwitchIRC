@@ -1,19 +1,23 @@
 import { create } from "zustand";
-import { Credentials, useCrendentialsStore } from "./credentials";
+import { useCrendentialsStore } from "./credentials";
 import { msgParcer } from "@src/twitchChat/parser";
-import { useJoinedStore } from "./joined";
 import { SecureIrcUrl } from "@src/twitchChat/twitch_data";
+import { useMessagesStore } from "./messages";
+import { isMentioned } from "../utils/isMentioned";
+import { useJoinedStore } from "./joined";
 
 export type WebSocketStoreState = {
   ws: WebSocket | null;
   connected: boolean;
-  setWs: (info: Credentials) => void;
+  setWs: () => void;
 };
 
 export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
   ws: null,
   connected: false,
-  setWs: (info) => {
+  setWs: () => {
+    const info = useCrendentialsStore.getState().info;
+    if (!info) return;
     const ws = new WebSocket(SecureIrcUrl);
     ws.onopen = () => {
       ws.send(
@@ -40,7 +44,12 @@ export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
           ws.send("PONG :tmi.twitch.tv");
           break;
         case "PRIVMSG":
-          const addMessage = useJoinedStore.getState().addMessage;
+          const addMessage = useMessagesStore.getState().addMessage;
+          const mentioned = isMentioned(info.login, parsedMsg.message);
+          if (mentioned) {
+            const setMentioned = useJoinedStore.getState().setMentioned;
+            setMentioned(parsedMsg.channel, true);
+          }
           addMessage(parsedMsg);
           break;
         case "NOTICE":
