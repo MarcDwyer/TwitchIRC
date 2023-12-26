@@ -39,7 +39,6 @@ export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
           ws.send(
             "CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership"
           );
-          console.log("conn");
           set({ connected: true, ws });
           break;
         case "PING":

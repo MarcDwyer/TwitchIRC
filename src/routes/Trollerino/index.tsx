@@ -5,7 +5,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Credentials, useCrendentialsStore } from "./stores/credentials";
 import { useWebSocketStore } from "./stores/websocket";
 import { useFollowersStore } from "./stores/followers";
-import { useShallow } from "zustand/react/shallow";
 import { toast } from "react-toastify";
 
 export type TwitchCredentials = {
@@ -15,10 +14,8 @@ export type TwitchCredentials = {
 
 export default function Trollerino() {
   const credentials = useCrendentialsStore();
-  const setWs = useWebSocketStore((store) => store.setWs);
-  const [getFollowers, followerError] = useFollowersStore(
-    useShallow((store) => [store.getFollowers, store.error])
-  );
+  const { setWs, ws } = useWebSocketStore();
+  const { error: followerError, getFollowers, followers } = useFollowersStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -51,7 +48,6 @@ export default function Trollerino() {
     let followerTimer: number | undefined;
     if (!followerError && credentials.info) {
       getFollowers();
-      setWs();
       if (followerTimer) clearInterval(followerTimer);
       followerTimer = setInterval(getFollowers, 10 * 60000);
     }
@@ -60,7 +56,7 @@ export default function Trollerino() {
         clearInterval(followerTimer);
       }
     };
-  }, [credentials, getFollowers, setWs, followerError]);
+  }, [credentials, getFollowers, followerError]);
 
   useEffect(() => {
     if (followerError) {
@@ -71,6 +67,13 @@ export default function Trollerino() {
       toast(followerError.message);
     }
   }, [followerError, navigate]);
+
+  useEffect(() => {
+    // connect to twitch IRC once the followers request has come through
+    if (!ws && credentials.info && !followerError && followers) {
+      setWs();
+    }
+  }, [followers, followerError, credentials, setWs, ws]);
 
   return (
     <div className="h-full w-full flex">
