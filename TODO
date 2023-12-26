@@ -1,8 +1,0 @@
-✔ Make messages local. If they're global it may cause unneeded rerenders. Find an alternate path @started(23-10-03 21:14) @done(23-12-13 22:35) @lasted(10w1d2h21m57s)
-✔ Pause chat when scrolling @done(23-12-13 22:35)
-
-Ideas
-# add @{username} with autocomplete (maybe use a tri data structure)
-# refresh followers every x minutes
-
-# split Joined state up. Have a messages store that stores messages of channels, decoupled from joined store
