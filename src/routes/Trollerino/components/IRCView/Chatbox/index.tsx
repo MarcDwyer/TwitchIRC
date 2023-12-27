@@ -1,21 +1,18 @@
 import { IRCMessages } from "./IRCMessages";
 import { ComposeMessage } from "./ComposeMessage";
 import { TwitchLink } from "@src/components/TwitchLink";
-import { useShallow } from "zustand/react/shallow";
 import { useActiveChannelStore } from "@src/routes/Trollerino/stores/activeChannel";
 import { useMemo } from "react";
-import { useMessagesStore } from "@src/routes/Trollerino/stores/messages";
+import { useChatStore } from "@src/routes/Trollerino/stores/chat";
 
 export const ChatBox = () => {
-  const { activeChannel, messages } = useActiveChannelStore(
-    useShallow((store) => ({
-      activeChannel: store.channel,
-      messages: store.messages,
-      // setPaused: store.setPaused,
-      // send: store.send,
-    }))
-  );
-  const sendMsg = useMessagesStore((store) => store.sendMsg);
+  const {
+    channel: activeChannel,
+    chat,
+    paused,
+    setPaused,
+  } = useActiveChannelStore();
+  const sendMsg = useChatStore((store) => store.sendMsg);
 
   const linkToStream = useMemo(() => {
     if (!activeChannel) {
@@ -24,6 +21,10 @@ export const ChatBox = () => {
     const link = "https://twitch.tv/" + activeChannel.streamData.user_name;
     return link;
   }, [activeChannel]);
+
+  const pause = () => setPaused(true);
+
+  const resume = () => setPaused(false);
 
   return (
     <>
@@ -39,25 +40,28 @@ export const ChatBox = () => {
               />
             )}
           </div>
-          {activeChannel.paused && (
+          {paused && (
             <div className="flex w-full">
               <button
                 className="m-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-                onClick={() => {}}
+                onClick={resume}
               >
                 Chat Paused: Click to unpause
               </button>
             </div>
           )}
-          <IRCMessages
-            messages={messages}
-            activeChannel={activeChannel}
-            pause={() => {}}
-            resume={() => {}}
-          />
-          <ComposeMessage
-            send={(message) => sendMsg(message, activeChannel.channelName)}
-          />
+          <>
+            <IRCMessages
+              messages={chat?.messages ?? []}
+              paused={paused}
+              pause={pause}
+              resume={resume}
+            />
+            <ComposeMessage
+              activeChannel={activeChannel}
+              send={(message) => sendMsg(message, activeChannel.channelName)}
+            />
+          </>
         </>
       )}
     </>

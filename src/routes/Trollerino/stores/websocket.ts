@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { useCrendentialsStore } from "./credentials";
 import { SecureIrcUrl } from "@src/twitchChat/twitch_data";
-import { useMessagesStore } from "./messages";
+import { useChatStore } from "./chat";
 import { isMentioned } from "../utils/isMentioned";
 import { useJoinedStore } from "./joined";
 import { msgParcer } from "@src/twitchChat/parser";
@@ -45,7 +45,7 @@ export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
           ws.send("PONG :tmi.twitch.tv");
           break;
         case "PRIVMSG": {
-          const addMessage = useMessagesStore.getState().addMessage;
+          const addMessage = useChatStore.getState().addMessage;
           const mentioned = isMentioned(info.login, parsedMsg.message);
           if (mentioned) {
             const setMentioned = useJoinedStore.getState().setMentioned;

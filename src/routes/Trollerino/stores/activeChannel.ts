@@ -1,65 +1,47 @@
 import { create } from "zustand";
 import { JoinedValue } from "./joined";
-import { IrcMessage } from "@src/twitchChat/twitch_data";
-import { useMessagesStore } from "./messages";
-// import { JoinedValue, useJoinedStore } from "./joined";
-// import { useCrendentialsStore } from "./credentials";
-// import { createIRCMessage } from "../utils/createIrcMessage";
-// import { useWebSocketStore } from "./websocket";
-// import { TwitchCmds } from "../utils/twitchCmds";
+import { Chat, createChat, useChatStore } from "./chat";
 
 export type ActiveChannelState = {
   channel: JoinedValue | null;
-  messages: IrcMessage[];
-  setMessages: (ircMsgs: IrcMessage[]) => void;
-  setActiveChannel: (channelName: JoinedValue | null) => void;
-  // setPaused: (pause: boolean) => void;
-  // send: (msg: string) => void;
-  // updateActiveChannel: (channel: JoinedValue | null) => void;
+  chat: Chat | null;
+  paused: boolean;
+  setChat: (chat: Chat) => void;
+  setActiveChannel: (channelName: JoinedValue) => void;
+  resetActiveChannel: () => void;
+  setPaused: (pause: boolean) => void;
 };
 
 export const useActiveChannelStore = create<ActiveChannelState>((set) => ({
   channel: null,
-  messages: [],
-  setMessages: (messages) => set({ messages }),
+  paused: false,
+  chat: null,
+  setChat: (chat) =>
+    set((state) => {
+      if (!state.paused) {
+        return { chat };
+      }
+      // if paused dont update messages just chatters
+      const updatedChat = state.chat ? { ...state.chat } : createChat();
+      updatedChat.chatters = chat.chatters;
+      return { chat: updatedChat };
+    }),
   setActiveChannel: (channel) =>
     set(() => {
-      const messages = channel
-        ? useMessagesStore.getState().messages.get(channel.channelName) ?? []
-        : [];
+      const chat = channel
+        ? useChatStore.getState().chatMap.get(channel.channelName)
+        : createChat();
+
       return {
         channel,
-        messages,
+        chat,
       };
     }),
-  // setPaused: (pause) => {
-  //   set((state) => {
-  //     if (!state.channel) return state;
-  //     return {
-  //       channel: {
-  //         ...state.channel,
-  //         paused: pause,
-  //       },
-  //     };
-  //   });
-  // },
-  // send: (message) =>
-  //   set((state) => {
-  //     const creds = useCrendentialsStore.getState().info;
-  //     const ws = useWebSocketStore.getState().ws;
-  //     if (!creds || !state.channel || !ws) return state;
-  //     ws.send(TwitchCmds.send(state.channel.channelName, message));
-  //     const ircMsg = createIRCMessage({
-  //       username: creds?.login,
-  //       message,
-  //       channelName: state.channel?.channelName,
-  //     });
-  //     const updatedChannel: JoinedValue = {
-  //       ...state.channel,
-  //       messages: [...state.channel.messages, ircMsg],
-  //     };
-  //     return {
-  //       channel: updatedChannel,
-  //     };
-  //   }),
+  resetActiveChannel: () =>
+    set({
+      chat: null,
+      channel: null,
+      paused: false,
+    }),
+  setPaused: (pause) => set({ paused: pause }),
 }));

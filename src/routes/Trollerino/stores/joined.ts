@@ -9,7 +9,7 @@ import { useWebSocketStore } from "./websocket";
 import { useFollowersStore } from "./followers";
 import { useCrendentialsStore } from "./credentials";
 import { useActiveChannelStore } from "./activeChannel";
-import { useMessagesStore } from "./messages";
+import { useChatStore } from "./chat";
 
 export type JoinedMap = Map<string, JoinedValue>;
 
@@ -78,7 +78,7 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
     }),
   part: (channelName) =>
     set((state) => {
-      const { channel: activeChannel, setActiveChannel } =
+      const { channel: activeChannel, resetActiveChannel } =
         useActiveChannelStore.getState();
       const isActive = activeChannel?.channelName === channelName;
       const updatedJoined = new Map(state.joined);
@@ -88,7 +88,7 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
         ws.send(TwitchCmds.part(channelName));
       }
       if (isActive) {
-        setActiveChannel(null);
+        resetActiveChannel();
       }
       return {
         joined: updatedJoined,
@@ -129,7 +129,7 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
       const userLogin = useCrendentialsStore.getState().info?.login;
       if (!ws || !userLogin) return state;
 
-      const addMsg = useMessagesStore.getState().addMessage;
+      const addMsg = useChatStore.getState().addMessage;
 
       const followers = useFollowersStore.getState().followers ?? [];
 

@@ -11,10 +11,10 @@ const checkIfBottom = (ele: any) => {
 type UsePauseHandlerProps = {
   paused: boolean;
   pause: () => void;
-  unpause: () => void;
+  resume: () => void;
 };
 
-export const useChatPause = ({ paused, unpause }: UsePauseHandlerProps) => {
+export const useChatPause = ({ paused, resume }: UsePauseHandlerProps) => {
   const prevPause = useRef(paused);
   const chatEleRef = useRef<any>();
 
@@ -34,7 +34,7 @@ export const useChatPause = ({ paused, unpause }: UsePauseHandlerProps) => {
       interval = setInterval(() => {
         const isBottom = checkIfBottom(chatEleRef.current);
         if (isBottom) {
-          unpause();
+          resume();
           clearInterval(interval);
         }
       }, 550);
@@ -44,7 +44,7 @@ export const useChatPause = ({ paused, unpause }: UsePauseHandlerProps) => {
         clearInterval(interval);
       }
     };
-  }, [paused, unpause]);
+  }, [paused, resume]);
 
   return {
     chatEleRef,
