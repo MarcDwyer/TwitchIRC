@@ -54,7 +54,7 @@ export const useChatTrie = ({ newMessage, chatters }: UseTrieParams) => {
       } else if (
         !trieState.init &&
         lastChar === "@" &&
-        lastIndex &&
+        Number.isInteger(lastIndex) &&
         lastIndex !== -1 &&
         isBeginningOfWord(newMessage, lastIndex)
       ) {

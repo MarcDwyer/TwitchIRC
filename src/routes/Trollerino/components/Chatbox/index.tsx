@@ -27,7 +27,7 @@ export const ChatBox = () => {
   const resume = () => setPaused(false);
 
   return (
-    <>
+    <div className="overflow-hidden h-full flex flex-col">
       {activeChannel && (
         <>
           <div className="m-2 flex">
@@ -50,21 +50,18 @@ export const ChatBox = () => {
               </button>
             </div>
           )}
-          <>
-            <IRCMessages
-              messages={chat?.messages ?? []}
-              paused={paused}
-              pause={pause}
-              resume={resume}
-            />
-            <ComposeMessage
-              activeChannel={activeChannel}
-              chat={chat}
-              send={(message) => sendMsg(message, activeChannel.channelName)}
-            />
-          </>
+          <IRCMessages
+            messages={chat?.messages ?? []}
+            paused={paused}
+            pause={pause}
+            resume={resume}
+          />
+          <ComposeMessage
+            chat={chat}
+            send={(message) => sendMsg(message, activeChannel.channelName)}
+          />
         </>
       )}
-    </>
+    </div>
   );
 };

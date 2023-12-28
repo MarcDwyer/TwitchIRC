@@ -1,5 +1,4 @@
 import { useCallback, useEffect } from "react";
-import { IRCView } from "./components/IRCView";
 import { Nav } from "./components/Nav";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Credentials, useCrendentialsStore } from "./stores/credentials";
@@ -80,7 +79,7 @@ export default function Trollerino() {
   return (
     <div className="h-full w-full flex">
       <Nav />
-      <div className="w-full h-full flex flex-col overflow-hidden">
+      <div className="w-full h-screen flex flex-col overflow-hidden">
         <JoinedTabs />
         <ChatBox />
       </div>

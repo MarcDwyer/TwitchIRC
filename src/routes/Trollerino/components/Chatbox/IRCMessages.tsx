@@ -24,13 +24,13 @@ export function IRCMessages({ paused, pause, resume, messages }: Props) {
     <div
       onWheel={pause}
       ref={chatEleRef}
-      className="overflow-y-auto m-auto w-11/12 overflow-x-hidden mt-5 mb-5 h-full"
+      className="h-full overflow-y-auto m-auto w-full overflow-x-hidden mt-5 mb-5 irc-messages relative"
     >
       {paused && <button>Chat has been paused: Click to unpause</button>}
       {messages.map((message, index) => {
         const color = message.tags.color;
         return (
-          <div key={index} className="mb-2">
+          <div key={index} className="m-2">
             <strong
               style={{
                 color,

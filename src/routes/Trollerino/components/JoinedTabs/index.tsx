@@ -23,13 +23,13 @@ export const JoinedTabs = () => {
   );
 
   useEffect(() => {
-    if (!activeChannel && joined.size) {
-      setActiveChannel(Array.from(joined.values())[0]);
+    if (!activeChannel && streams.length) {
+      setActiveChannel(streams[0]);
     }
-  }, [activeChannel, joined, setActiveChannel]);
+  }, [activeChannel, streams, setActiveChannel]);
 
   return (
-    <div className="w-full bg-gray-700 flex flex-nowrap h-20 overflow-x-auto">
+    <div className="w-full bg-gray-700 flex flex-nowrap overflow-x-auto h-12">
       {streams.map((stream, index) => (
         <JoinedTab
           key={index}
