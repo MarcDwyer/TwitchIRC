@@ -6,6 +6,8 @@ import { Credentials, useCrendentialsStore } from "./stores/credentials";
 import { useWebSocketStore } from "./stores/websocket";
 import { useFollowersStore } from "./stores/followers";
 import { toast } from "react-toastify";
+import { JoinedTabs } from "./components/JoinedTabs";
+import { ChatBox } from "./components/Chatbox";
 
 export type TwitchCredentials = {
   loginName: string;
@@ -78,7 +80,10 @@ export default function Trollerino() {
   return (
     <div className="h-full w-full flex">
       <Nav />
-      <IRCView />
+      <div className="w-full h-full flex flex-col overflow-hidden">
+        <JoinedTabs />
+        <ChatBox />
+      </div>
     </div>
   );
 }

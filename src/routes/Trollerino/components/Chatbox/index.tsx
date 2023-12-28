@@ -59,6 +59,7 @@ export const ChatBox = () => {
             />
             <ComposeMessage
               activeChannel={activeChannel}
+              chat={chat}
               send={(message) => sendMsg(message, activeChannel.channelName)}
             />
           </>

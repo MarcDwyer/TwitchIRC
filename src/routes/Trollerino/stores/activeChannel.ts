@@ -23,7 +23,7 @@ export const useActiveChannelStore = create<ActiveChannelState>((set) => ({
       }
       // if paused dont update messages just chatters
       const updatedChat = state.chat ? { ...state.chat } : createChat();
-      updatedChat.chatters = chat.chatters;
+      updatedChat.chatters = new Set(chat.chatters);
       return { chat: updatedChat };
     }),
   setActiveChannel: (channel) =>
