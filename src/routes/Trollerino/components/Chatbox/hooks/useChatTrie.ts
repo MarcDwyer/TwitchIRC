@@ -3,28 +3,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const createTrieState = () => ({
   init: false,
-  startIndex: -1,
   taggedWord: "",
 });
-function isBeginningOfWord(word: string, index: number) {
-  const prevChar = word[index - 1];
 
-  if (prevChar === " " || !prevChar) {
-    return true;
-  }
-  return false;
-}
-function getTaggedWord(word: string, startIndex: number) {
-  let taggedWord = "";
-
-  for (let i = startIndex; startIndex < word.length; i++) {
-    const char = word[i];
-    if (char === "" || !char) {
-      break;
-    }
-    taggedWord += char;
-  }
-  return taggedWord;
+function isSingleAlphanumeric(str: string) {
+  return str.length === 1 && str.match(/^[a-zA-Z0-9]+$/);
 }
 export type UseTrieParams = {
   newMessage: string;
@@ -40,64 +23,59 @@ export const useChatTrie = ({ newMessage, chatters }: UseTrieParams) => {
     for (const chatter of chatters) {
       tri.insert(chatter);
     }
+    console.log({ t: trieState.taggedWord });
     return tri.search(trieState.taggedWord);
   }, [trieState, chatters]);
 
   const handleInputEvt = useCallback(
-    function (this: HTMLInputElement, evt: KeyboardEvent) {
-      const lastChar = evt.key;
+    function (this: HTMLInputElement, ev: any) {
+      if (!isSingleAlphanumeric(ev.key)) return;
       const lastIndex =
-        this.selectionStart !== null ? this.selectionStart - 1 : -1;
+        this.selectionStart !== null ? this.selectionStart - 1 : 0;
 
-      if (lastChar === " " && trieState.init) {
-        setTrieState(createTrieState());
-      } else if (
-        !trieState.init &&
-        lastChar === "@" &&
-        Number.isInteger(lastIndex) &&
-        lastIndex !== -1 &&
-        isBeginningOfWord(newMessage, lastIndex)
-      ) {
+      let word = "";
+      for (let i = lastIndex; i >= 0; i--) {
+        const char = newMessage[i];
+        if (char === " ") break;
+        word = char + word;
+      }
+      if (word[0] === "@") {
+        console.log("tag detected");
         setTrieState({
-          ...trieState,
           init: true,
-          startIndex: lastIndex,
+          taggedWord: word.substring(1, word.length),
+        });
+      } else {
+        setTrieState({
+          init: false,
+          taggedWord: "",
         });
       }
     },
     [newMessage, setTrieState]
   );
 
-  useEffect(() => {
-    if (inputRef.current) {
-      if (inputRef.current) {
-        inputRef.current.removeEventListener("keyup", handleInputEvt);
-        inputRef.current?.addEventListener("keyup", handleInputEvt);
-      }
-      return function () {
-        if (inputRef.current) {
-          inputRef.current.removeEventListener("keyup", handleInputEvt);
-        }
-      };
-    }
-  }, [handleInputEvt]);
+  const clearTrie = useCallback(() => {
+    setTrieState(createTrieState());
+  }, [setTrieState]);
 
   useEffect(() => {
-    if (trieState.init) {
-      const taggedWord = getTaggedWord(newMessage, trieState.startIndex + 1);
-      if (taggedWord === trieState.taggedWord) {
-        return;
-      }
-      setTrieState({
-        ...trieState,
-        taggedWord,
-      });
+    const input = inputRef.current as HTMLInputElement | null;
+    if (input) {
+      input.addEventListener("keyup", handleInputEvt);
     }
-  }, [trieState, newMessage, setTrieState]);
+
+    return function () {
+      if (input) {
+        input.removeEventListener("keyup", handleInputEvt);
+      }
+    };
+  }, [handleInputEvt]);
 
   return {
     inputRef,
     trieState,
     recommendedTags,
+    clearTrie,
   };
 };

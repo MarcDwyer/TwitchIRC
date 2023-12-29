@@ -10,24 +10,28 @@ type Props = {
 
 export function ComposeMessage({ send, chat }: Props) {
   const [newMessage, setNewMessage] = useState("");
-  const { inputRef, recommendedTags, trieState } = useChatTrie({
+  const { inputRef, recommendedTags, trieState, clearTrie } = useChatTrie({
     chatters: chat?.chatters,
     newMessage,
   });
-
-  console.log({ recommendedTags });
   return (
-    <div className="relative p-2 border-2 flex flex-col">
+    <div className="relative p-2 flex flex-col">
       {trieState.init && recommendedTags.length > 0 && (
         <RecommendedTags
           recommendedTags={recommendedTags}
           onSelect={() => {}}
+          clearTrie={clearTrie}
         />
       )}
       <form
         className="flex h-42 mt-6"
         onSubmit={(e) => {
           e.preventDefault();
+          if (trieState.init) {
+            console.log(`Submitted tag: ${trieState.taggedWord}`);
+            clearTrie();
+            return;
+          }
           send(newMessage);
           setNewMessage("");
         }}
