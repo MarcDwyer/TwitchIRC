@@ -8,7 +8,11 @@ export default {
     "node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      minHeight: (theme) => ({
+        ...theme("spacing"),
+      }),
+    },
   },
   plugins: [flowbitPlugin],
 };

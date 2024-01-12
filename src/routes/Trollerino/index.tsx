@@ -7,6 +7,7 @@ import { useFollowersStore } from "./stores/followers";
 import { toast } from "react-toastify";
 import { JoinedTabs } from "./components/JoinedTabs";
 import { ChatBox } from "./components/Chatbox";
+import { TwitchStream } from "./components/TwitchStream";
 
 export type TwitchCredentials = {
   loginName: string;
@@ -81,6 +82,7 @@ export default function Trollerino() {
       <Nav />
       <div className="w-full h-screen flex flex-col overflow-hidden">
         <JoinedTabs />
+        <TwitchStream />
         <ChatBox />
       </div>
     </div>

@@ -29,7 +29,7 @@ export const JoinedTabs = () => {
   }, [activeChannel, streams, setActiveChannel]);
 
   return (
-    <div className="w-full bg-gray-700 flex flex-nowrap overflow-x-auto h-12">
+    <div className="w-full bg-gray-700 flex flex-nowrap overflow-x-auto h-12 flex-none">
       {streams.map((stream, index) => (
         <JoinedTab
           key={index}

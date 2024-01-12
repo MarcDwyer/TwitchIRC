@@ -23,7 +23,6 @@ export const useChatTrie = ({ newMessage, chatters }: UseTrieParams) => {
     for (const chatter of chatters) {
       tri.insert(chatter);
     }
-    console.log({ t: trieState.taggedWord });
     return tri.search(trieState.taggedWord);
   }, [trieState, chatters]);
 

@@ -28,8 +28,6 @@ export function ComposeMessage({ send, chat }: Props) {
         onSubmit={(e) => {
           e.preventDefault();
           if (trieState.init) {
-            console.log(`Submitted tag: ${trieState.taggedWord}`);
-            clearTrie();
             return;
           }
           send(newMessage);

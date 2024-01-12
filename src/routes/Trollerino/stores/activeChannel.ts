@@ -6,16 +6,20 @@ export type ActiveChannelState = {
   channel: JoinedValue | null;
   chat: Chat | null;
   paused: boolean;
+  showStream: boolean;
   setChat: (chat: Chat) => void;
   setActiveChannel: (channelName: JoinedValue) => void;
   resetActiveChannel: () => void;
   setPaused: (pause: boolean) => void;
+  setShowStream: (show: boolean) => void;
 };
 
 export const useActiveChannelStore = create<ActiveChannelState>((set) => ({
   channel: null,
   paused: false,
   chat: null,
+  showStream: false,
+  setShowStream: (show) => set({ showStream: show }),
   setChat: (chat) =>
     set((state) => {
       if (!state.paused) {
@@ -35,6 +39,7 @@ export const useActiveChannelStore = create<ActiveChannelState>((set) => ({
       return {
         channel,
         chat,
+        showStream: false,
       };
     }),
   resetActiveChannel: () =>
@@ -42,6 +47,7 @@ export const useActiveChannelStore = create<ActiveChannelState>((set) => ({
       chat: null,
       channel: null,
       paused: false,
+      showStream: false,
     }),
   setPaused: (pause) => set({ paused: pause }),
 }));

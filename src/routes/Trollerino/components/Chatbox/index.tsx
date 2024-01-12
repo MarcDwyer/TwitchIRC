@@ -1,8 +1,6 @@
 import { IRCMessages } from "./IRCMessages";
 import { ComposeMessage } from "./ComposeMessage";
-import { TwitchLink } from "@src/components/TwitchLink";
 import { useActiveChannelStore } from "@src/routes/Trollerino/stores/activeChannel";
-import { useMemo } from "react";
 import { useChatStore } from "@src/routes/Trollerino/stores/chat";
 
 export const ChatBox = () => {
@@ -14,14 +12,6 @@ export const ChatBox = () => {
   } = useActiveChannelStore();
   const sendMsg = useChatStore((store) => store.sendMsg);
 
-  const linkToStream = useMemo(() => {
-    if (!activeChannel) {
-      return null;
-    }
-    const link = "https://twitch.tv/" + activeChannel.streamData.user_name;
-    return link;
-  }, [activeChannel]);
-
   const pause = () => setPaused(true);
 
   const resume = () => setPaused(false);
@@ -30,16 +20,6 @@ export const ChatBox = () => {
     <div className="overflow-hidden h-full flex flex-col">
       {activeChannel && (
         <>
-          <div className="m-2 flex">
-            {linkToStream && (
-              <TwitchLink
-                classNames="m-auto"
-                href={linkToStream}
-                text={`Watch ${activeChannel.streamData.user_login}`}
-                newTab={true}
-              />
-            )}
-          </div>
           {paused && (
             <div className="flex w-full">
               <button
