@@ -28,7 +28,7 @@ export const useRecommendedTags = ({
         case "ArrowUp":
           const nextDown = selTagIndex - 1;
           if (tags[nextDown]) {
-            setSelTagIndex(selTagIndex - 1);
+            setSelTagIndex(nextDown);
           }
           break;
       }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Chat } from "../../stores/chat";
 import { useChatTrie } from "./hooks/useChatTrie";
 import { RecommendedTags } from "./RecommendedTags";
+import { insertTag } from "../../utils/Chatbox/insertTag";
 
 type Props = {
   send: (msg: string) => void;
@@ -14,17 +15,41 @@ export function ComposeMessage({ send, chat }: Props) {
     chatters: chat?.chatters,
     newMessage,
   });
+
+  // useEffect(() => {
+  //   return function () {
+  //     setNewMessage("");
+  //     // clearTrie();
+  //   };
+  // }, [chat, setNewMessage, clearTrie]);
+
   return (
-    <div className="relative p-2 flex flex-col">
+    <div className="relative flex flex-col">
       {trieState.init && recommendedTags.length > 0 && (
         <RecommendedTags
           recommendedTags={recommendedTags}
-          onSelect={() => {}}
+          onSelect={(tag) => {
+            const [insertedMsg, endOfTagIndices] = insertTag(
+              tag,
+              trieState.startOfTag,
+              newMessage,
+              trieState.taggedWord
+            );
+            setNewMessage(insertedMsg);
+            clearTrie();
+            const input = inputRef.current;
+            console.log({ endOfTagIndices });
+            if (input) {
+              input.focus();
+              input.selectionStart = endOfTagIndices;
+              input.selectionEnd = endOfTagIndices;
+            }
+          }}
           clearTrie={clearTrie}
         />
       )}
       <form
-        className="flex h-42 mt-6"
+        className="flex h-42 w-full"
         onSubmit={(e) => {
           e.preventDefault();
           if (trieState.init) {

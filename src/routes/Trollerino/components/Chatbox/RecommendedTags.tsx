@@ -7,11 +7,13 @@ type Props = {
   clearTrie: () => void;
 };
 
-export function RecommendedTags({ recommendedTags, clearTrie }: Props) {
+export function RecommendedTags({
+  recommendedTags,
+  clearTrie,
+  onSelect,
+}: Props) {
   const selectedTag = useRecommendedTags({
-    onSelect: (tag) => {
-      console.log({ tag });
-    },
+    onSelect,
     tags: recommendedTags,
   });
 

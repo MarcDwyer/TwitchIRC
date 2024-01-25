@@ -22,7 +22,6 @@ export function TwitchStream() {
         (() => {
           const streamUser = activeChannel.streamData.user_name;
           const onClick = show ? hide : display;
-          // const text = `${show ? "Hide" : "Show"} ${streamUser}'s stream`;
           return (
             <>
               <div
@@ -32,7 +31,9 @@ export function TwitchStream() {
                 <FontAwesomeIcon
                   size={"2x"}
                   icon={faTwitch}
-                  className="m-auto"
+                  className={`m-auto ${
+                    show ? "text-rose-700" : "text-indigo-600"
+                  }`}
                 />
               </div>
               {show && (

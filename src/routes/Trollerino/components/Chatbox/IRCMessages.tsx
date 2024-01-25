@@ -24,7 +24,7 @@ export function IRCMessages({ paused, pause, resume, messages }: Props) {
     <div
       onWheel={pause}
       ref={chatEleRef}
-      className="h-full overflow-y-auto m-auto w-full overflow-x-hidden mt-5 mb-5 irc-messages relative"
+      className="h-full overflow-y-auto m-auto w-full overflow-x-hidden irc-messages relative"
     >
       {paused && <button>Chat has been paused: Click to unpause</button>}
       {messages.map((message, index) => {

@@ -4,10 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 const createTrieState = () => ({
   init: false,
   taggedWord: "",
+  startOfTag: -1,
 });
 
-function isSingleAlphanumeric(str: string) {
-  return str.length === 1 && str.match(/^[a-zA-Z0-9]+$/);
+export function isSingleAlphanumeric(str: string) {
+  return str.match(/^[a-zA-Z0-9]+$/);
 }
 export type UseTrieParams = {
   newMessage: string;
@@ -26,9 +27,11 @@ export const useChatTrie = ({ newMessage, chatters }: UseTrieParams) => {
     return tri.search(trieState.taggedWord);
   }, [trieState, chatters]);
 
-  const handleInputEvt = useCallback(
-    function (this: HTMLInputElement, ev: any) {
-      if (!isSingleAlphanumeric(ev.key)) return;
+  const detectTag = useCallback(
+    function (this: HTMLInputElement, { key }: any) {
+      if (key.length !== 1 || !isSingleAlphanumeric(key)) {
+        return;
+      }
       const lastIndex =
         this.selectionStart !== null ? this.selectionStart - 1 : 0;
 
@@ -38,16 +41,18 @@ export const useChatTrie = ({ newMessage, chatters }: UseTrieParams) => {
         if (char === " ") break;
         word = char + word;
       }
-      if (word[0] === "@") {
-        console.log("tag detected");
+      if (word[0] === "@" && word.length >= 2) {
+        const taggedWord = word.substring(1, word.length);
         setTrieState({
           init: true,
-          taggedWord: word.substring(1, word.length),
+          taggedWord,
+          startOfTag: lastIndex - taggedWord.length + 1,
         });
       } else {
         setTrieState({
           init: false,
           taggedWord: "",
+          startOfTag: -1,
         });
       }
     },
@@ -61,15 +66,15 @@ export const useChatTrie = ({ newMessage, chatters }: UseTrieParams) => {
   useEffect(() => {
     const input = inputRef.current as HTMLInputElement | null;
     if (input) {
-      input.addEventListener("keyup", handleInputEvt);
+      input.addEventListener("keyup", detectTag);
     }
 
     return function () {
       if (input) {
-        input.removeEventListener("keyup", handleInputEvt);
+        input.removeEventListener("keyup", detectTag);
       }
     };
-  }, [handleInputEvt]);
+  }, [detectTag]);
 
   return {
     inputRef,

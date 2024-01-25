@@ -45,7 +45,7 @@ export class Trie {
     if (node.isEnd) {
       list.push(word);
     }
-    if (limit >= depthLimit) return list;
+    // if (limit >= depthLimit) return list;
     limit++;
     for (const childNode of Object.values(node.children)) {
       this.getSuggestions(childNode, list, limit, word, false);
