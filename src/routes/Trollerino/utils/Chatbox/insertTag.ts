@@ -7,7 +7,7 @@ export function insertTag(
   let insertedMsg = "";
 
   let endOfTagPos = -1;
-  console.log(msg[startOfTag]);
+
   for (let i = 0; i < msg.length; ) {
     if (i === startOfTag) {
       for (let j = 0; j < completeTag.length; j++) {

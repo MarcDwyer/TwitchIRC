@@ -1,5 +1,5 @@
 import { Trie } from "@src/utils/trie";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 const createTrieState = () => ({
   init: false,
@@ -63,23 +63,11 @@ export const useChatTrie = ({ newMessage, chatters }: UseTrieParams) => {
     setTrieState(createTrieState());
   }, [setTrieState]);
 
-  useEffect(() => {
-    const input = inputRef.current as HTMLInputElement | null;
-    if (input) {
-      input.addEventListener("keyup", detectTag);
-    }
-
-    return function () {
-      if (input) {
-        input.removeEventListener("keyup", detectTag);
-      }
-    };
-  }, [detectTag]);
-
   return {
     inputRef,
     trieState,
     recommendedTags,
     clearTrie,
+    detectTag,
   };
 };

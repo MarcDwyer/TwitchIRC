@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Chat } from "../../stores/chat";
 import { useChatTrie } from "./hooks/useChatTrie";
 import { RecommendedTags } from "./RecommendedTags";
@@ -8,20 +8,43 @@ type Props = {
   send: (msg: string) => void;
   chat: Chat | null;
 };
+const SubmitKeys = new Set(["Enter", "Tab"]);
+const isSubmitKey = (key: string) => SubmitKeys.has(key);
+const isNavKey = (key: string) => key.startsWith("Arrow");
 
 export function ComposeMessage({ send, chat }: Props) {
   const [newMessage, setNewMessage] = useState("");
-  const { inputRef, recommendedTags, trieState, clearTrie } = useChatTrie({
-    chatters: chat?.chatters,
-    newMessage,
-  });
+  const { inputRef, recommendedTags, trieState, clearTrie, detectTag } =
+    useChatTrie({
+      chatters: chat?.chatters,
+      newMessage,
+    });
 
-  // useEffect(() => {
-  //   return function () {
-  //     setNewMessage("");
-  //     // clearTrie();
-  //   };
-  // }, [chat, setNewMessage, clearTrie]);
+  useEffect(() => {
+    return function () {
+      setNewMessage("");
+    };
+  }, [send, setNewMessage]);
+
+  const handleInputEvt = useCallback(
+    function (this: HTMLInputElement, evt: any) {
+      const key = evt.key;
+      if (isSubmitKey(key) || isNavKey(key)) {
+        return;
+      }
+      detectTag.call(this as HTMLInputElement, evt);
+    },
+    [detectTag]
+  );
+  useEffect(() => {
+    const input = inputRef.current;
+    if (input) {
+      input.addEventListener("keyup", handleInputEvt);
+    }
+    return function () {
+      input?.removeEventListener("keyup", handleInputEvt);
+    };
+  }, [handleInputEvt]);
 
   return (
     <div className="relative flex flex-col">
@@ -35,15 +58,14 @@ export function ComposeMessage({ send, chat }: Props) {
               newMessage,
               trieState.taggedWord
             );
-            setNewMessage(insertedMsg);
-            clearTrie();
             const input = inputRef.current;
-            console.log({ endOfTagIndices });
             if (input) {
               input.focus();
-              input.selectionStart = endOfTagIndices;
-              input.selectionEnd = endOfTagIndices;
+              input.setSelectionRange(endOfTagIndices, endOfTagIndices);
             }
+            setNewMessage(insertedMsg);
+            console.log(insertedMsg[endOfTagIndices]);
+            clearTrie();
           }}
           clearTrie={clearTrie}
         />

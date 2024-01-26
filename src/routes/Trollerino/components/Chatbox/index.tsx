@@ -2,6 +2,7 @@ import { IRCMessages } from "./IRCMessages";
 import { ComposeMessage } from "./ComposeMessage";
 import { useActiveChannelStore } from "@src/routes/Trollerino/stores/activeChannel";
 import { useChatStore } from "@src/routes/Trollerino/stores/chat";
+import { useCallback } from "react";
 
 export const ChatBox = () => {
   const {
@@ -15,6 +16,15 @@ export const ChatBox = () => {
   const pause = () => setPaused(true);
 
   const resume = () => setPaused(false);
+
+  const send = useCallback(
+    (msg: string) => {
+      if (activeChannel) {
+        sendMsg(msg, activeChannel?.channelName);
+      }
+    },
+    [activeChannel?.channelName, sendMsg]
+  );
 
   return (
     <div className="overflow-hidden h-full flex flex-col">
@@ -36,10 +46,7 @@ export const ChatBox = () => {
             pause={pause}
             resume={resume}
           />
-          <ComposeMessage
-            chat={chat}
-            send={(message) => sendMsg(message, activeChannel.channelName)}
-          />
+          <ComposeMessage chat={chat} send={send} />
         </>
       )}
     </div>
