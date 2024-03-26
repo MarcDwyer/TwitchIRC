@@ -62,6 +62,7 @@ export interface IrcMessage {
   params: string[];
   message: string;
   username: string;
+  mentioned?: boolean;
 }
 export interface ClearChatMessage extends IrcMessage {
   userName: string;

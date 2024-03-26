@@ -7,3 +7,4 @@ Ideas
 # refresh followers every x minutes
 
 # split Joined state up. Have a messages store that stores messages of channels, decoupled from joined store
+☐ Remove Chat store & move chat to activeChannelStore

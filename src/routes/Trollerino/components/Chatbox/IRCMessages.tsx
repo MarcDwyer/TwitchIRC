@@ -29,6 +29,9 @@ export function IRCMessages({ paused, pause, resume, messages }: Props) {
       {paused && <button>Chat has been paused: Click to unpause</button>}
       {messages.map((message, index) => {
         const color = message.tags.color;
+        if (message.mentioned) {
+          console.log({ message });
+        }
         return (
           <div key={index} className="m-2">
             <strong

@@ -1,5 +1,5 @@
 import { Trie } from "@src/utils/trie";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 const createTrieState = () => ({
   init: false,
@@ -16,7 +16,6 @@ export type UseTrieParams = {
 };
 export const useChatTrie = ({ newMessage, chatters }: UseTrieParams) => {
   const [trieState, setTrieState] = useState(createTrieState());
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const recommendedTags = useMemo(() => {
     const tri = new Trie();
@@ -64,7 +63,6 @@ export const useChatTrie = ({ newMessage, chatters }: UseTrieParams) => {
   }, [setTrieState]);
 
   return {
-    inputRef,
     trieState,
     recommendedTags,
     clearTrie,

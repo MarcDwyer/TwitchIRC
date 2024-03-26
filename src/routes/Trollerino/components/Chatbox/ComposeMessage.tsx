@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Chat } from "../../stores/chat";
 import { useChatTrie } from "./hooks/useChatTrie";
 import { RecommendedTags } from "./RecommendedTags";
@@ -14,11 +14,13 @@ const isNavKey = (key: string) => key.startsWith("Arrow");
 
 export function ComposeMessage({ send, chat }: Props) {
   const [newMessage, setNewMessage] = useState("");
-  const { inputRef, recommendedTags, trieState, clearTrie, detectTag } =
-    useChatTrie({
-      chatters: chat?.chatters,
-      newMessage,
-    });
+
+  const inputRef = useRef<HTMLInputElement>();
+
+  const { recommendedTags, trieState, clearTrie, detectTag } = useChatTrie({
+    chatters: chat?.chatters,
+    newMessage,
+  });
 
   useEffect(() => {
     return function () {
@@ -52,19 +54,18 @@ export function ComposeMessage({ send, chat }: Props) {
         <RecommendedTags
           recommendedTags={recommendedTags}
           onSelect={(tag) => {
-            const [insertedMsg, endOfTagIndices] = insertTag(
-              tag,
-              trieState.startOfTag,
-              newMessage,
-              trieState.taggedWord
-            );
+            const [insertedMsg, endOfTagIndices] = insertTag({
+              completeTag: tag,
+              startOfTag: trieState.startOfTag,
+              searchTag: trieState.taggedWord,
+              msg: newMessage,
+            });
             const input = inputRef.current;
             if (input) {
               input.focus();
               input.setSelectionRange(endOfTagIndices, endOfTagIndices);
             }
             setNewMessage(insertedMsg);
-            console.log(insertedMsg[endOfTagIndices]);
             clearTrie();
           }}
           clearTrie={clearTrie}

@@ -1,9 +1,15 @@
-export function insertTag(
-  completeTag: string,
-  startOfTag: number,
-  msg: string,
-  searchTag: string
-): [string, number] {
+type InserTagParams = {
+  completeTag: string;
+  startOfTag: number;
+  msg: string;
+  searchTag: string;
+};
+export function insertTag({
+  completeTag,
+  startOfTag,
+  msg,
+  searchTag,
+}: InserTagParams): [string, number] {
   let insertedMsg = "";
 
   let endOfTagPos = -1;
@@ -13,8 +19,6 @@ export function insertTag(
       for (let j = 0; j < completeTag.length; j++) {
         insertedMsg += completeTag[j];
       }
-      console.log({ startOfTag, completeTag });
-      // endOfTag seems correct... something else is repositioning cursor
       endOfTagPos = startOfTag + completeTag.length - 1;
       i += searchTag.length;
     } else {

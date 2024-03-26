@@ -21,7 +21,6 @@ export function RecommendedTags({
     <div className="sticky top-0 left-0 flex z-20">
       <ModalBackground
         onClick={() => {
-          console.log("clearing");
           clearTrie();
         }}
       />

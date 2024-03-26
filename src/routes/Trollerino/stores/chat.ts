@@ -10,7 +10,7 @@ export type Chat = {
   chatters: Set<string>;
   messages: IrcMessage[];
 };
-type ChatMap = Map<string, Chat>;
+export type ChatMap = Map<string, Chat>;
 
 type UseChatStore = {
   chatMap: ChatMap;
@@ -18,23 +18,27 @@ type UseChatStore = {
   sendMsg: (msg: string, channelName: string) => void;
 };
 
-export const createChat = (): Chat => ({
-  chatters: new Set(),
+export const createChat = (streamerName: string): Chat => ({
+  chatters: new Set([streamerName]),
   messages: [],
 });
 
 export const MESSAGE_LIMIT = 350;
 
-export const useChatStore = create<UseChatStore>((set) => ({
+export const useChatStore = create<UseChatStore>((set, get) => ({
   chatMap: new Map(),
   addMessage: (ircMsg) =>
     set((state) => {
-      const { channel: activeChan, setChat: setActiveChat } =
-        useActiveChannelStore.getState();
-      const isActive = activeChan?.channelName === ircMsg.channel;
+      const activeChanName =
+        useActiveChannelStore.getState().channel?.channelName;
+
+      const isActiveChannel = activeChanName === ircMsg.channel;
+
+      console.log({ isActiveChannel });
       const updatedChatMap = new Map(state.chatMap);
 
-      const chat = updatedChatMap.get(ircMsg.channel) ?? createChat();
+      const chat =
+        updatedChatMap.get(ircMsg.channel) ?? createChat(ircMsg.channel);
 
       const updatedMsgs = [...chat.messages, ircMsg];
 
@@ -50,9 +54,6 @@ export const useChatStore = create<UseChatStore>((set) => ({
         messages: updatedMsgs,
         chatters: updatedChatters,
       };
-      if (isActive) {
-        setActiveChat(updatedChat);
-      }
       updatedChatMap.set(ircMsg.channel, updatedChat);
 
       return {
@@ -75,7 +76,8 @@ export const useChatStore = create<UseChatStore>((set) => ({
       ws.send(TwitchCmds.send(channelName, msg));
       const updatedChatMap = new Map(store.chatMap);
 
-      const updatedChat = updatedChatMap.get(ircMsg.channel) ?? createChat();
+      const updatedChat =
+        updatedChatMap.get(ircMsg.channel) ?? createChat(channelName);
 
       updatedChat.messages.push(ircMsg);
       // setActiveMsgs(updatedMessages.get(ircMsg.channel) as IrcMessage[]);

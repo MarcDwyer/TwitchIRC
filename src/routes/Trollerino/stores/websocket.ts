@@ -5,6 +5,7 @@ import { useChatStore } from "./chat";
 import { isMentioned } from "../utils/isMentioned";
 import { useJoinedStore } from "./joined";
 import { msgParcer } from "@src/twitchChat/parser";
+import { TwitchCmds } from "../utils/twitchCmds";
 
 export type WebSocketStoreState = {
   ws: WebSocket | null;
@@ -40,6 +41,13 @@ export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
             "CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership"
           );
           set({ connected: true, ws });
+          // connect ws to rooms currently joined
+          const joined = useJoinedStore.getState().joined;
+          if (joined.size) {
+            for (const channelName of joined.keys()) {
+              ws.send(TwitchCmds.join(channelName));
+            }
+          }
           break;
         case "PING":
           ws.send("PONG :tmi.twitch.tv");
@@ -51,6 +59,7 @@ export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
             const setMentioned = useJoinedStore.getState().setMentioned;
             setMentioned(parsedMsg.channel, true);
           }
+          Object.assign(parsedMsg, { mentioned });
           addMessage(parsedMsg);
           break;
         }
@@ -60,11 +69,12 @@ export const useWebSocketStore = create<WebSocketStoreState>((set) => ({
           if (parsedMsg.raw.includes("failed")) {
             console.log("ws failed... closing");
             ws.close();
-            set({ connected: false });
           }
           break;
       }
     };
-    ws.onclose = () => set({ connected: false });
+    ws.onerror = console.error;
+
+    ws.onclose = () => set({ connected: false, ws: null });
   },
 }));
