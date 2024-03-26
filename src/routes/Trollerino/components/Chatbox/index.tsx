@@ -2,25 +2,11 @@ import { IRCMessages } from "./IRCMessages";
 import { ComposeMessage } from "./ComposeMessage";
 import { useActiveChannelStore } from "@src/routes/Trollerino/stores/activeChannel";
 import { useChatStore } from "@src/routes/Trollerino/stores/chat";
-import { useCallback, useEffect, useMemo, useRef } from "react";
-
-function useChatMessages(channelName: string | undefined) {
-  const chatMap = useChatStore((store) => store.chatMap);
-
-  const messages = useMemo(() => {
-    if (!channelName) {
-      return null;
-    }
-    return chatMap.get(channelName) ?? null;
-  }, [channelName, chatMap]);
-
-  return messages;
-}
+import { useCallback } from "react";
 
 export const ChatBox = () => {
   const { channel: activeChannel, paused, setPaused } = useActiveChannelStore();
   const sendMsg = useChatStore((store) => store.sendMsg);
-  const chat = useChatMessages(activeChannel?.channelName);
 
   const pause = () => setPaused(true);
 

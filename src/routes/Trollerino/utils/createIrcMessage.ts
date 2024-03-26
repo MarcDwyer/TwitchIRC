@@ -1,6 +1,6 @@
 import { Badges, IrcMessage } from "@src/twitchChat/twitch_data";
 
-type CreateIRCMessageParams = {
+export type CreateIRCMessageParams = {
   username: string;
   message: string;
   channelName: string;
