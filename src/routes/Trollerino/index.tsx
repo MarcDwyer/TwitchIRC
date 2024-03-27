@@ -2,12 +2,12 @@ import { useCallback, useEffect } from "react";
 import { Nav } from "./components/Nav";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Credentials, useCrendentialsStore } from "./stores/credentials";
-import { useWebSocketStore } from "./stores/websocket";
 import { useFollowersStore } from "./stores/followers";
 import { toast } from "react-toastify";
 import { JoinedTabs } from "./components/JoinedTabs";
 import { ChatBox } from "./components/Chatbox";
 import { TwitchStream } from "./components/TwitchStream";
+import { useWebSocket } from "./hooks/useWebSocket";
 
 export type TwitchCredentials = {
   loginName: string;
@@ -16,10 +16,11 @@ export type TwitchCredentials = {
 
 export default function Trollerino() {
   const credentials = useCrendentialsStore();
-  const { setWs, ws } = useWebSocketStore();
-  const { error: followerError, getFollowers, followers } = useFollowersStore();
+  const { error: followerError, getFollowers } = useFollowersStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  useWebSocket();
 
   const getCredentials = useCallback(
     (loginName: string | null, token: string | null) => {
@@ -69,13 +70,6 @@ export default function Trollerino() {
       toast(followerError.message);
     }
   }, [followerError, navigate]);
-
-  useEffect(() => {
-    // connect to twitch IRC once the followers request has come through
-    if (!ws && credentials.info && !followerError && followers) {
-      setWs();
-    }
-  }, [followers, followerError, credentials, setWs, ws]);
 
   return (
     <div className="h-full w-full flex">

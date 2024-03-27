@@ -15,7 +15,7 @@ export type ChatMap = Map<string, Chat>;
 type UseChatStore = {
   chatMap: ChatMap;
   addMessage: (ircMsg: IrcMessage) => void;
-  sendMsg: (msg: string, channelName: string) => void;
+  sendMsg: (msg: string) => void;
 };
 
 export const createChat = (streamerName: string): Chat => ({
@@ -25,16 +25,15 @@ export const createChat = (streamerName: string): Chat => ({
 
 export const MESSAGE_LIMIT = 350;
 
-export const useChatStore = create<UseChatStore>((set, get) => ({
+export const useChatStore = create<UseChatStore>((set) => ({
   chatMap: new Map(),
   addMessage: (ircMsg) =>
     set((state) => {
-      const activeChanName =
-        useActiveChannelStore.getState().channel?.channelName;
+      const activeState = useActiveChannelStore.getState();
 
-      const isActiveChannel = activeChanName === ircMsg.channel;
+      const isActiveChannel =
+        activeState.channel?.channelName === ircMsg.channel;
 
-      console.log({ isActiveChannel });
       const updatedChatMap = new Map(state.chatMap);
 
       const chat =
@@ -54,19 +53,23 @@ export const useChatStore = create<UseChatStore>((set, get) => ({
         messages: updatedMsgs,
         chatters: updatedChatters,
       };
+      if (isActiveChannel) {
+        activeState.setChat(updatedChat);
+      }
       updatedChatMap.set(ircMsg.channel, updatedChat);
 
       return {
         chatMap: updatedChatMap,
       };
     }),
-  sendMsg: (msg, channelName) =>
+  sendMsg: (msg) =>
     set((store) => {
       const ws = useWebSocketStore.getState().ws;
       const creds = useCrendentialsStore.getState().info;
-      // const setActiveMsgs = useActiveChannelStore.getState().setMessages;
+      const { setChat, channel } = useActiveChannelStore.getState();
+      const channelName = channel?.channelName;
 
-      if (!creds || !ws) return store;
+      if (!creds || !ws || !channelName) return store;
 
       const ircMsg = createIRCMessage({
         username: creds.login,
@@ -80,7 +83,7 @@ export const useChatStore = create<UseChatStore>((set, get) => ({
         updatedChatMap.get(ircMsg.channel) ?? createChat(channelName);
 
       updatedChat.messages.push(ircMsg);
-      // setActiveMsgs(updatedMessages.get(ircMsg.channel) as IrcMessage[]);
+      setChat(updatedChat);
       updatedChatMap.set(ircMsg.channel, { ...updatedChat });
       return {
         chatMap: updatedChatMap,

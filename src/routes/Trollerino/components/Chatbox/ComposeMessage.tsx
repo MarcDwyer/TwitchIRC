@@ -87,6 +87,7 @@ export function ComposeMessage({ send, chat }: Props) {
           placeholder="Type your message..."
           className="w-full p-5 rounded-l-md text-black"
           value={newMessage}
+          //@ts-ignore
           ref={inputRef}
           onChange={(e) => {
             setNewMessage(e.target.value);

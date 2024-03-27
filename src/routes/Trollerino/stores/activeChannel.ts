@@ -1,43 +1,39 @@
 import { create } from "zustand";
 import { JoinedValue } from "./joined";
 import { Chat, useChatStore } from "./chat";
-import {
-  CreateIRCMessageParams,
-  createIRCMessage,
-} from "../utils/createIrcMessage";
-import { useCrendentialsStore } from "./credentials";
-import { useWebSocketStore } from "./websocket";
-import { TwitchCmds } from "../utils/twitchCmds";
+import { IrcMessage } from "@src/twitchChat/twitch_data";
 
 export type ActiveChannelState = {
   channel: JoinedValue | null;
   paused: boolean;
   showStream: boolean;
   chat: Chat;
-  setActiveChannel: (channelName: JoinedValue) => void;
+  setActiveChannel: (channelName: JoinedValue, chat?: Chat) => void;
   resetActiveChannel: () => void;
   setPaused: (pause: boolean) => void;
   setShowStream: (show: boolean) => void;
-  sendMsg: (msg: string) => void;
+  addMsg: (ircMsg: IrcMessage) => void;
+  setChat: (chat: Chat) => void;
 };
 const createDefaultChat = (): Chat => ({ chatters: new Set(), messages: [] });
-export const useActiveChannelStore = create<ActiveChannelState>((set) => ({
+export const useActiveChannelStore = create<ActiveChannelState>((set, get) => ({
   channel: null,
   paused: false,
   chat: createDefaultChat(),
   showStream: false,
   setShowStream: (show) => set({ showStream: show }),
-  setActiveChannel: (channel) =>
-    set(() => {
-      const chat = channel;
-      useChatStore.getState().chatMap.get(channel.channelName);
+  setActiveChannel: (channel) => {
+    const chatMap = useChatStore.getState().chatMap;
+    const chat = chatMap.get(channel.channelName) ?? createDefaultChat();
+    if (chat) {
+      set({ chat });
+    }
+    set({
+      channel,
+      showStream: false,
+    });
+  },
 
-      return {
-        channel,
-        chat,
-        showStream: false,
-      };
-    }),
   resetActiveChannel: () =>
     set({
       channel: null,
@@ -46,22 +42,10 @@ export const useActiveChannelStore = create<ActiveChannelState>((set) => ({
     }),
   setPaused: (pause) => set({ paused: pause }),
   setChat: (chat: Chat) => set({ chat }),
-  sendMsg: (msg: string) =>
+  addMsg: (ircMsg) =>
     set((state) => {
-      const ws = useWebSocketStore.getState().ws;
-      if (ws) {
-        const chat = { ...state.chat };
-        const ircMsgParams: CreateIRCMessageParams = {
-          username: useCrendentialsStore.getState().info?.login ?? "",
-          channelName: state.channel?.channelName ?? "",
-          message: msg,
-        };
-        ws.send(TwitchCmds.send(ircMsgParams.channelName, msg));
-        chat.messages.push(createIRCMessage(ircMsgParams));
-        return { chat };
-      } else {
-        console.error(`Attempted to send msg with no WS connection`);
-        return state;
-      }
+      const chat = { ...state.chat };
+      chat.messages.push(ircMsg);
+      return { chat };
     }),
 }));

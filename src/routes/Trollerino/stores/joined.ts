@@ -38,7 +38,7 @@ type JoinedStoreState = {
   joined: Map<string, JoinedValue>;
   updateJoined: (updatedJoined: JoinedMap) => void;
   part: (channelName: string) => void;
-  join: (twitchStream: TwitchStream) => void;
+  join: (joinedValue: JoinedValue) => void;
   setPaused: (channelName: string, paused: boolean) => void;
   broadcast: (message: string) => void;
   resetMentioned: (channelName: string) => void;
@@ -94,19 +94,11 @@ export const useJoinedStore = create<JoinedStoreState>((set) => ({
         joined: updatedJoined,
       };
     }),
-  join: (stream) =>
+  join: (joinedValue) =>
     set((state) => {
-      const setActiveChannel =
-        useActiveChannelStore.getState().setActiveChannel;
       const updatedJoined = new Map(state.joined);
-      const channelName = createChannelName(stream.user_login);
-      const joinedChannel = createJoinedValue(channelName, stream);
-      updatedJoined.set(channelName, joinedChannel);
-      const ws = useWebSocketStore.getState().ws;
-      if (ws) {
-        ws.send(TwitchCmds.join(channelName));
-      }
-      setActiveChannel(joinedChannel);
+      updatedJoined.set(joinedValue.channelName, joinedValue);
+
       return { joined: updatedJoined };
     }),
   setPaused: (channelName, paused) =>

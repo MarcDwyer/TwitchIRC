@@ -1,25 +1,22 @@
 import { IRCMessages } from "./IRCMessages";
 import { ComposeMessage } from "./ComposeMessage";
 import { useActiveChannelStore } from "@src/routes/Trollerino/stores/activeChannel";
-import { useChatStore } from "@src/routes/Trollerino/stores/chat";
-import { useCallback } from "react";
+import { useChatStore } from "../../stores/chat";
 
 export const ChatBox = () => {
-  const { channel: activeChannel, paused, setPaused } = useActiveChannelStore();
-  const sendMsg = useChatStore((store) => store.sendMsg);
+  const {
+    channel: activeChannel,
+    paused,
+    setPaused,
+    chat,
+  } = useActiveChannelStore();
+
+  const send = useChatStore((store) => store.sendMsg);
 
   const pause = () => setPaused(true);
 
   const resume = () => setPaused(false);
 
-  const send = useCallback(
-    (msg: string) => {
-      if (activeChannel) {
-        sendMsg(msg, activeChannel.channelName);
-      }
-    },
-    [activeChannel?.channelName, sendMsg]
-  );
   console.log("render");
   return (
     <div className="overflow-hidden h-full flex flex-col">
